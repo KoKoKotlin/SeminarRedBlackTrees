@@ -23,7 +23,7 @@
 Binary Tree: $t = (u, r, v), u, v$ sind Binary Trees, $r \in K$ ($K$ Schlüsselmenge z.B. ($\mathbb{Z}, \mathbb{N}$))
 
 Sei $n \in \mathbb{N}$
-$T = \{ t_1, t_2, ..., t_n \} $ mit $ \: t_i \ne t_j \:$ für $i \ne j$
+$T = \{ t_1, t_2, ..., t_n \} $ mit $ \: t_i \ne t_j \: $ für $i \ne j$
 
 $root : P(T) \rightarrow T$
 $r_i = root(T)$ für $i \le n$
@@ -92,6 +92,9 @@ $\Rightarrow$ Kleine Demo in python
 
 * spezieller Weg des Balancierens
 * nur Binär $\Rightarrow$ für allgemeine Bäume B-Tree, AVL-Tree
+
+## Implemetierung Binärbaume
+* struct mit Pointer zu children $(l, r)$
 
 Quellen:
     [1] The Art of Computer Programming
