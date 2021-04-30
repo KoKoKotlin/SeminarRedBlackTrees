@@ -6,11 +6,19 @@ FLAGS = -Wall -Wextra
 OBJECTS = main.o rbtree.o
 TARGET = rbtree.out
 
+all: $(TARGET)
+
+debug: FLAGS += -DDEBUG -g
+debug: $(TARGET)
+
 $(TARGET) : $(OBJECTS)
 	$(CC) -o $(TARGET) $(OBJECTS) $(LIBS)
 
-main.o : rbtree.h
-rbtree.o : rbtree.h
+shared:
+	echo "Unimplemented"
+
+main.o : rbtree.h log.h
+rbtree.o : rbtree.h	log.h
 
 %.o : %.c
 	$(CC) -c $(FLAGS) $<
