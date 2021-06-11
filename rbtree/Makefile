@@ -3,7 +3,7 @@ CC = gcc
 LIBS =
 FLAGS = -Wall -Wextra
 
-OBJECTS = main.o rbtree.o
+OBJECTS = main.o rbtree.o stack.o
 TARGET = rbtree.out
 
 all: $(TARGET)
@@ -17,8 +17,9 @@ $(TARGET) : $(OBJECTS)
 shared:
 	echo "Unimplemented"
 
-main.o : rbtree.h log.h
-rbtree.o : rbtree.h	log.h
+main.o : include/rbtree.h include/log.h
+rbtree.o : include/rbtree.h	include/log.h
+stack.o : include/log.h
 
 %.o : %.c
 	$(CC) -c $(FLAGS) $<
