@@ -6,9 +6,10 @@ FLAGS = -Wall -Wextra
 OBJECTS = main.o rbtree.o stack.o
 TARGET = rbtree.out
 
+all: FLAGS += -O3
 all: $(TARGET)
 
-debug: FLAGS += -DDEBUG -g
+debug: FLAGS += -DDEBUG -g -ggdb
 debug: $(TARGET)
 
 $(TARGET) : $(OBJECTS)

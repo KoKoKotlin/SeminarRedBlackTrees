@@ -7,13 +7,19 @@
 struct Stack* create_stack(size_t initial_capacity)
 {
     struct Stack *stack = malloc(sizeof(struct Stack));
+
+    if (stack == NULL) {
+        debug_print("Couldn't allocate memory for stack!");
+        return NULL;
+    }
+
     stack->current_position = 0;
     stack->current_capacity = initial_capacity;
 
     stack->array = malloc(sizeof(void*) * initial_capacity);
 
     if (stack->array == NULL) {
-        debug_print("Couldn't allocate memory for stack!");
+        debug_print("Couldn't allocate memory for internal array of stack!");
         return NULL;
     }
 
@@ -48,15 +54,33 @@ uint8_t push(struct Stack *stack, void *element)
     return STACK_SUCCESS;
 }
 
-uint8_t pop(struct Stack *stack, void **element)
+uint8_t _pop(struct Stack *stack, void **element)
 {
     if (stack->current_position == 0) {
         debug_print("Prevented pop from empty stack!");
         *element = NULL;
-        return STACK_POP_FROM_EMTPY_STACK;
+        return STACK_READ_FROM_EMTPY_STACK;
     }
 
     *element = stack->array[--(stack->current_position)];
-    debug_printf("Popped element at %p from stack. Current position is now at %zu", element, stack->current_position);
+    debug_printf("Popped element at %p from stack. Current position is now at %zu", *element, stack->current_position);
     return STACK_SUCCESS;
+}
+
+uint8_t _peek(struct Stack *stack, void **element)
+{
+    if (stack->current_position == 0) {
+        debug_print("Prevented peek on empty stack!");
+        *element = NULL;
+        return STACK_READ_FROM_EMTPY_STACK;
+    }
+
+    *element = stack->array[stack->current_position - 1];
+    debug_printf("Peeked at element at %zu from stack.", stack->current_position);
+    return STACK_SUCCESS;
+}
+
+uint8_t is_stack_empty(struct Stack *stack)
+{
+    return (stack->current_position == 0) ? STACK_EMPTY : STACK_NOT_EMTPY;
 }
