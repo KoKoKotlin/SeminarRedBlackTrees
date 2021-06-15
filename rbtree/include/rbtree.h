@@ -36,6 +36,8 @@ struct Node {
 
 struct RBTree {
     struct Node *root;
+
+    size_t node_count;
 };
 
 struct RBTree* create_tree();

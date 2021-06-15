@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <math.h>
 
 #include "include/log.h"
 #include "include/rbtree.h"
@@ -109,6 +110,7 @@ uint8_t insert_node(struct RBTree* rbtree, T* key, void* value)
         debug_printf("Inserting " T_FORMAT " with parent " T_FORMAT ".", *key, *(previous->key));
     }
 
+    rbtree->node_count++;
     return RB_TREE_SUCCESS;
 }
 
@@ -214,6 +216,7 @@ uint8_t delete_node(struct RBTree* rbtree, T* key)
         _free_node(node_to_delete);
     }
 
+    rbtree->node_count--;
     return RB_TREE_SUCCESS;
 }
 
@@ -267,7 +270,7 @@ uint8_t preorder_traversel(struct RBTree *rbtree, void (*action)(struct Node*))
     }
 
     struct Node *current = NULL;
-    struct Stack *stack = create_stack(10);  // TODO: maybe log(n)
+    struct Stack *stack = create_stack((size_t)log2((double)rbtree->node_count));
     push(stack, rbtree->root);
 
     debug_printf("Starting preorder traversel with tree with root key " T_FORMAT ".", *(rbtree->root->key));
@@ -298,7 +301,7 @@ uint8_t postorder_traversel(struct RBTree *rbtree, void (*action)(struct Node*))
 
     struct Node *last = NULL;
     struct Node *current = rbtree->root;
-    struct Stack *stack = create_stack(10);  // TODO: maybe log(n)
+    struct Stack *stack = create_stack((size_t)log2((double)rbtree->node_count));
 
     debug_printf("Starting postorder traversel with tree with root key " T_FORMAT ".", *(rbtree->root->key));
 
@@ -334,7 +337,7 @@ uint8_t inorder_traversel(struct RBTree *rbtree, void (*action)(struct Node*))
     }
 
     struct Node *current = rbtree->root;
-    struct Stack *stack = create_stack(10);  // TODO: maybe log(n)
+    struct Stack *stack = create_stack((size_t)log2((double)rbtree->node_count));
 
     debug_printf("Starting inorder traversel with tree with root key " T_FORMAT ".", *(rbtree->root->key));
 
