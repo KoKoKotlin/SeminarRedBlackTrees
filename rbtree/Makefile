@@ -12,6 +12,10 @@ all: $(TARGET)
 debug: FLAGS += -DDEBUG -g -ggdb
 debug: $(TARGET)
 
+log: debug
+log:
+	./$(TARGET) > log
+
 $(TARGET) : $(OBJECTS)
 	$(CC) -o $(TARGET) $(OBJECTS) $(LIBS)
 
@@ -27,4 +31,4 @@ stack.o : include/log.h
 
 .PHONY : clean
 clean :
-	rm -rf $(TARGET) $(OBJECTS) 
+	rm -rf $(TARGET) $(OBJECTS) log

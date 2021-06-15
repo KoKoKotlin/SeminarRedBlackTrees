@@ -77,7 +77,7 @@ void test_rbtree() {
     inorder_traversel(rbtree, &print_key);
     printf("\n");
 
-/*
+
     srand(time(NULL));
     // fill stack with lots of heap allocated random numbers
     for (size_t u = 0; u < 10000; u++) {
@@ -93,7 +93,7 @@ void test_rbtree() {
 
     postorder_traversel(rbtree, &print_key);
     printf("\n");
-*/
+
     free_tree(rbtree);
 }
 
