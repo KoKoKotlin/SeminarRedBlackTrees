@@ -45,7 +45,7 @@ void test_rbtree() {
     insert_node(rbtree, five, NULL);
     insert_node(rbtree, seven, NULL);
 
-    int key = 3;
+    T key = 3;
     struct Node *snode = NULL;
     search_node(rbtree, &key, &snode);
 
@@ -78,7 +78,7 @@ void test_rbtree() {
     printf("\n");
 
 
-    srand(time(NULL));
+    /*srand(time(NULL));
     // fill stack with lots of heap allocated random numbers
     for (size_t u = 0; u < 10000; u++) {
         T *elem = malloc_elem((T)rand());
@@ -93,7 +93,8 @@ void test_rbtree() {
 
     postorder_traversel(rbtree, &print_key);
     printf("\n");
-
+*/
+    insert_node(rbtree, one, NULL);
     free_tree(rbtree);
 }
 
@@ -117,9 +118,9 @@ void test_stack() {
 
     // retreiving 3 elements back
     for (size_t u = 0; u < 3; u++) {
-        int *elem = malloc_elem(rand());
+        T *elem = malloc_elem((T)rand());
         error = pop(stack, &elem);
-        printf("elem %zu: %d with error code %u\n", u, *elem, error);
+        printf("elem %zu:" T_FORMAT " with error code %u\n", u, *elem, error);
     }
 
     srand(time(NULL));

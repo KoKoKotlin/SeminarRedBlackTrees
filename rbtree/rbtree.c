@@ -100,6 +100,20 @@ uint8_t insert_node(struct RBTree* rbtree, T* key, void* value)
                 count++;
             #endif
 
+            #if RB_TREE_DUPLICATE_KEYS == RB_TREE_DUPLICATE_FORBID || RB_TREE_DUPLICATE_KEYS == RB_TREE_DUPLICATE_ALLOW_EXTERN
+                if (*(current->key) == *key) {
+                    debug_printf("Key " T_FORMAT " already exists. Aborting...", *key);
+                    return RB_TREE_DUPLICATE_KEY_ERROR;
+                }
+            #elif RB_TREE_DUPLICATE_KEYS == RB_TREE_DUPLICATE_OVERRIDE
+                if (*(current->key) == *key) {
+                    debug_printf("Key " T_FORMAT " already exists. Overriding value.", *key);
+                    free(current->value);
+                    current->value = value;
+                    return RB_TREE_SUCCESS;
+                }
+            #endif
+
             previous = current;
             current  = (*key < *(current->key)) ? previous->left : previous->right;
         }
@@ -114,6 +128,21 @@ uint8_t insert_node(struct RBTree* rbtree, T* key, void* value)
     rbtree->node_count++;
     return RB_TREE_SUCCESS;
 }
+
+#if RB_TREE_DUPLICATE_KEYS == RB_TREE_DUPLICATE_OVERRIDE_EXTERN
+uint8_t override_value(struct RBTree *rbtree, T *key, void *value) {
+    struct Node *node = NULL;
+
+    uint8_t error = search_node(rbtree, key, &node);
+    if (error == RB_TREE_KEY_ERROR) return RB_TREE_KEY_ERROR;
+
+    debug_printf("Overriding node with key: " T_FORMAT ".", *key);
+    free(node->value);
+    node->value = value;
+
+    return RB_TREE_SUCCESS;
+}
+#endif
 
 void get_next_smallest(struct Node *start, struct Node **next_smallest, struct Node **parent) {
     struct Node *previous = *parent;
