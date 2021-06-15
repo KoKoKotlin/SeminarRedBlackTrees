@@ -1,6 +1,6 @@
 SHELL = /bin/sh
 CC = gcc
-LIBS =
+LIBS = -lm
 FLAGS = -Wall -Wextra
 
 OBJECTS = main.o rbtree.o stack.o
