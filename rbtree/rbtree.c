@@ -64,12 +64,57 @@ void _free_node(struct Node *node)
     free(node);
 }
 
-void color_flip(struct RBTree *rbtree, struct Node *start_node) {
-
+struct Node* get_grandparent(struct Node *start) {
+    if (start->parent != NULL) return start->parent->parent;
+    else return NULL;
 }
 
-void rotate(struct RBTree *rbtree, struct Node *start_node) {
+struct Node* get_uncle(struct Node *start) {
+    struct Node *parent = start->parent;
+    if (parent == NULL) {
+        return NULL;
+    }
 
+    struct Node *grandparent = parent->parent;
+    if (grandparent == NULL) {
+        return NULL;
+    }
+
+    if (grandparent->left == parent) return grandparent->right;
+    else return grandparent->left;
+}
+
+void color_flip(struct RBTree *rbtree, struct Node *start_node) {
+    // color flip parent, uncle, and grandparent
+    struct Node *parent = start_node->parent;
+    struct Node *grandparent = get_grandparent(start_node);
+    struct Node *uncle = get_uncle(start_node);
+
+    if (parent != NULL) parent->color = !parent->color;
+    if (grandparent != NULL) grandparent->color = !grandparent->color;
+    if (uncle != NULL) uncle->color = !uncle->color;
+}
+
+void rotate(struct RBTree *rbtree, struct Node *start_node, uint8_t direction) {
+    if (direction == LEFT_ROTATE) {
+        struct Node *child = start_node->left;
+
+        if (start_node->parent->left == start_node) start_node->parent->left = child;
+        else start_node->parent->right = child;
+
+        start_node->right = child->left;
+        child->left = start_node;
+        start_node->parent = child;
+    } else if (direction == RIGHT_ROTATE) {
+        struct Node *parent = start_node->parent;
+
+        if (parent->parent->left == parent) parent->parent->left = start_node;
+        else parent->parent->right = start_node;
+
+        parent->left = start_node->right;
+        start_node->right = parent;
+        parent->parent = start_node;
+    }
 }
 
 uint8_t insert_node(struct RBTree *rbtree, T *key, void *value)
