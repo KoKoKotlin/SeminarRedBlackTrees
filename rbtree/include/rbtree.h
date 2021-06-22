@@ -37,6 +37,7 @@ struct Node {
 
     struct Node *left;
     struct Node *right;
+    struct Node *parent;    // simplifies a lot of the algorithms
 
     uint8_t color;
 };

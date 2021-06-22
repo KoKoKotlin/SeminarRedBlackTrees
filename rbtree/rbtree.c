@@ -48,6 +48,7 @@ struct Node* _create_node(T *key, void *value)
 
     new_node->key   = key;
     new_node->value = value;
+    new_node->parent = NULL;
 
     return new_node;
 }
@@ -63,7 +64,15 @@ void _free_node(struct Node *node)
     free(node);
 }
 
-uint8_t insert_node(struct RBTree* rbtree, T* key, void* value)
+void color_flip(struct RBTree *rbtree, struct Node *start_node) {
+
+}
+
+void rotate(struct RBTree *rbtree, struct Node *start_node) {
+
+}
+
+uint8_t insert_node(struct RBTree *rbtree, T *key, void *value)
 {
     if (rbtree == NULL) {
         debug_print("Given tree was null! Aborting...");
@@ -122,6 +131,8 @@ uint8_t insert_node(struct RBTree* rbtree, T* key, void* value)
 
         if (*key < *(previous->key)) previous->left = new_node;
         else previous->right = new_node;
+        new_node->parent = previous;
+
         debug_printf("Inserting " T_FORMAT " with parent " T_FORMAT ".", *key, *(previous->key));
     }
 
@@ -144,33 +155,27 @@ uint8_t override_value(struct RBTree *rbtree, T *key, void *value) {
 }
 #endif
 
-void get_next_smallest(struct Node *start, struct Node **next_smallest, struct Node **parent) {
-    struct Node *previous = *parent;
+void get_next_smallest(struct Node *start, struct Node **next_smallest) {
     struct Node *current  = start;
 
     while (current->right != NULL) {
-        previous = current;
         current = current->right;
     }
 
     *next_smallest = current;
-    *parent = previous;
 }
 
-void get_next_largest(struct Node *start, struct Node **next_smallest, struct Node **parent) {
-    struct Node *previous = *parent;
+void get_next_largest(struct Node *start, struct Node **next_smallest) {
     struct Node *current  = start;
 
     while (current->left != NULL) {
-        previous = current;
         current = current->left;
     }
 
     *next_smallest = current;
-    *parent = previous;
 }
 
-
+// TODO: test this function again, bc of new parent pointer
 uint8_t delete_node(struct RBTree* rbtree, T* key)
 {
     if (rbtree == NULL) {
@@ -183,30 +188,19 @@ uint8_t delete_node(struct RBTree* rbtree, T* key)
         return RB_TREE_NULL_ERROR;
     }
 
-    struct Node *parent_node = NULL;
     struct Node *node_to_delete = NULL;
-
-    struct Node *previous = NULL;
-    struct Node *current  = rbtree->root;
-
-    while (current != NULL) {
-        if (*(current->key) == *key) break;
-        previous = current;
-        current = (*(previous->key) < *key) ? previous->right : previous->left;
-    }
-
-    parent_node = previous;
-    node_to_delete = current;
+    search_node(rbtree, key, &node_to_delete);
 
     if (node_to_delete == NULL) {
         debug_print("There is no node with the given key!");
         return RB_TREE_KEY_ERROR;
     }
 
+    struct Node *parent_node = node_to_delete->parent;
+
     if (node_to_delete->left != NULL) {
         struct Node *next_smallest =  NULL;
-        struct Node *next_smallest_parent = node_to_delete;
-        get_next_smallest(node_to_delete->left, &next_smallest, &next_smallest_parent);
+        get_next_smallest(node_to_delete->left, &next_smallest);
 
         debug_printf("Deleting node " T_FORMAT " and replacing with the next smallest node " T_FORMAT ".", *(node_to_delete->key), *(next_smallest->key));
 
@@ -216,14 +210,13 @@ uint8_t delete_node(struct RBTree* rbtree, T* key)
         node_to_delete->key = next_smallest->key;
         node_to_delete->value = next_smallest->value;
 
-        if (next_smallest_parent == node_to_delete) next_smallest_parent->left = NULL;
-        else next_smallest_parent->right = NULL;
+        if (next_smallest->parent == node_to_delete) next_smallest->parent->left = NULL;
+        else next_smallest->parent->right = NULL;
 
         free(next_smallest);
     } else if (node_to_delete->right != NULL) {
         struct Node *next_largest =  NULL;
-        struct Node *next_largest_parent = node_to_delete;
-        get_next_largest(node_to_delete->right, &next_largest, &next_largest_parent);
+        get_next_largest(node_to_delete->right, &next_largest);
 
         debug_printf("Deleting node " T_FORMAT " and replacing with the next largest node " T_FORMAT ".", *(node_to_delete->key), *(next_largest->key));
 
@@ -232,8 +225,9 @@ uint8_t delete_node(struct RBTree* rbtree, T* key)
 
         node_to_delete->key = next_largest->key;
         node_to_delete->value = next_largest->value;
-        if (next_largest_parent == node_to_delete) next_largest_parent->right = NULL;
-        else next_largest_parent->left = NULL;
+
+        if (next_largest->parent == node_to_delete) next_largest->parent->right = NULL;
+        else next_largest->parent->left = NULL;
         free(next_largest);
     } else {
         debug_printf("Deleting node " T_FORMAT " with no chidren.", *(node_to_delete->key));
