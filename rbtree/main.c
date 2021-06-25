@@ -3,6 +3,7 @@
 #include "include/log.h"
 #include "include/rbtree.h"
 #include "include/stack.h"
+#include "include/visualize.h"
 
 void test_stack();
 void test_rbtree();
@@ -35,16 +36,30 @@ void test_rbtree() {
     T *five  = malloc_elem(5);
     T *six  = malloc_elem(6);
     T *seven  = malloc_elem(7);
+    T *ten = malloc_elem(10);
 
     // creating balanced tree
     insert_node(rbtree, four, NULL);
     insert_node(rbtree, two, NULL);
     insert_node(rbtree, one, NULL);
+    ascii_art_tree(rbtree);
+    printf("\n");
     insert_node(rbtree, three, NULL);
+    ascii_art_tree(rbtree);
+    printf("\n");
     insert_node(rbtree, six, NULL);
+    ascii_art_tree(rbtree);
+    printf("\n");
     insert_node(rbtree, five, NULL);
+    ascii_art_tree(rbtree);
+    printf("\n");
     insert_node(rbtree, seven, NULL);
+    ascii_art_tree(rbtree);
+    printf("\n");
+    insert_node(rbtree, ten, NULL);
 
+    ascii_art_tree(rbtree);
+/*
     T key = 3;
     struct Node *snode = NULL;
     search_node(rbtree, &key, &snode);
@@ -78,7 +93,7 @@ void test_rbtree() {
     printf("\n");
 
 
-    /*srand(time(NULL));
+    srand(time(NULL));
     // fill stack with lots of heap allocated random numbers
     for (size_t u = 0; u < 10000; u++) {
         T *elem = malloc_elem((T)rand());
@@ -93,8 +108,9 @@ void test_rbtree() {
 
     postorder_traversel(rbtree, &print_key);
     printf("\n");
-*/
+
     insert_node(rbtree, one, NULL);
+*/
     free_tree(rbtree);
 }
 

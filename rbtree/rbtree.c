@@ -49,6 +49,7 @@ struct Node* _create_node(T *key, void *value)
     new_node->key   = key;
     new_node->value = value;
     new_node->parent = NULL;
+    new_node->color = RB_TREE_RED;
 
     return new_node;
 }
@@ -64,12 +65,21 @@ void _free_node(struct Node *node)
     free(node);
 }
 
-struct Node* get_grandparent(struct Node *start) {
+struct Node* get_grandparent(struct Node *start)
+{
     if (start->parent != NULL) return start->parent->parent;
     else return NULL;
 }
 
-struct Node* get_uncle(struct Node *start) {
+uint8_t get_direction(struct Node *start_node) {
+    struct Node *parent = start_node->parent;
+    if (parent == NULL) return RB_TREE_NULL_ERROR;
+
+    return (parent->left == start_node) ? RB_TREE_LEFT_CHILD : RB_TREE_RIGHT_CHILD;
+}
+
+struct Node* get_uncle(struct Node *start)
+{
     struct Node *parent = start->parent;
     if (parent == NULL) {
         return NULL;
@@ -84,7 +94,8 @@ struct Node* get_uncle(struct Node *start) {
     else return grandparent->left;
 }
 
-void color_flip(struct RBTree *rbtree, struct Node *start_node) {
+void color_flip(struct Node *start_node)
+{
     // color flip parent, uncle, and grandparent
     struct Node *parent = start_node->parent;
     struct Node *grandparent = get_grandparent(start_node);
@@ -93,28 +104,85 @@ void color_flip(struct RBTree *rbtree, struct Node *start_node) {
     if (parent != NULL) parent->color = !parent->color;
     if (grandparent != NULL) grandparent->color = !grandparent->color;
     if (uncle != NULL) uncle->color = !uncle->color;
+
+    debug_printf("Did color flip at node " T_FORMAT ".", *(start_node->key));
 }
 
-void rotate(struct RBTree *rbtree, struct Node *start_node, uint8_t direction) {
+void rotate(struct Node *start_node, uint8_t direction, struct RBTree *rbtree)
+{
     if (direction == LEFT_ROTATE) {
-        struct Node *child = start_node->left;
+        struct Node *child = start_node->right;
+        if (start_node == rbtree->root) rbtree->root = child;
+        child->parent = start_node->parent;
 
-        if (start_node->parent->left == start_node) start_node->parent->left = child;
-        else start_node->parent->right = child;
-
+        if (start_node->parent != NULL) {
+            if (start_node->parent->left == start_node) start_node->parent->left = child;
+            else start_node->parent->right = child;
+        }
+        
         start_node->right = child->left;
         child->left = start_node;
         start_node->parent = child;
-    } else if (direction == RIGHT_ROTATE) {
-        struct Node *parent = start_node->parent;
+        debug_printf("Did left rotate at node " T_FORMAT ".", *(start_node->key));
+    } else if (direction == RIGHT_ROTATE) { 
+        struct Node *child = start_node->left;
+        if (start_node == rbtree->root) rbtree->root = child;
+        child->parent = start_node->parent;
+        
+        if (start_node->parent != NULL) {
+            if (start_node->parent->left == start_node) start_node->parent->left = child;
+            else start_node->parent->right = child;
+        }
 
-        if (parent->parent->left == parent) parent->parent->left = start_node;
-        else parent->parent->right = start_node;
-
-        parent->left = start_node->right;
-        start_node->right = parent;
-        parent->parent = start_node;
+        start_node->left = child->right;
+        child->right = start_node;
+        start_node->parent = child;
+        debug_printf("Did right rotate at node " T_FORMAT ".", *(start_node->key));
     }
+
+    if (rbtree->root->color == RB_TREE_RED) rbtree->root->color = RB_TREE_BLACK;
+}
+
+void fix_tree_insert(struct Node *start_node, struct RBTree *rbtree) {
+
+    struct Node *current = start_node;
+    struct Node *parent = start_node->parent;
+    while (parent != NULL && parent->color == RB_TREE_RED && current->color == RB_TREE_RED) {
+        if (parent->parent == NULL) break; // special case for root node
+
+        uint8_t parent_direction = get_direction(parent);
+        struct Node *uncle = get_uncle(current);
+
+        if (uncle == NULL || uncle->color == RB_TREE_BLACK) { // rotate
+            if ((parent_direction == RB_TREE_RIGHT_CHILD && parent->left  == current)
+             || (parent_direction == RB_TREE_LEFT_CHILD  && parent->right == current)) {
+                rotate(parent, parent_direction, rbtree);
+                current = parent;
+                parent = current->parent;
+            } else {
+                struct Node *grandparent = get_grandparent(current);
+                rotate(grandparent, !parent_direction, rbtree);
+                parent->color = RB_TREE_BLACK;
+                grandparent->color = RB_TREE_RED;
+                break;
+            }
+        }
+
+        if (uncle->color == RB_TREE_RED) {  // color flip: P + U == RED
+            color_flip(current);
+
+            current = get_grandparent(current);
+            parent = current->parent;
+            debug_print("Red uncle -> colorflip and move to grandparent. Continuing");
+        }
+    }
+
+    // re-color the root
+    rbtree->root->color = RB_TREE_BLACK;
+}
+
+void fix_tree_delete(struct Node *start_node) {
+
 }
 
 uint8_t insert_node(struct RBTree *rbtree, T *key, void *value)
@@ -129,7 +197,6 @@ uint8_t insert_node(struct RBTree *rbtree, T *key, void *value)
         return RB_TREE_NULL_ERROR;
     }
 
-    // TODO: implement beahvior for same key or forbid same key
     struct Node *new_node = _create_node(key, value);
 
     if (new_node == NULL) {
@@ -139,6 +206,7 @@ uint8_t insert_node(struct RBTree *rbtree, T *key, void *value)
 
     if (rbtree->root == NULL) {
         rbtree->root = new_node;
+        rbtree->root->color = RB_TREE_BLACK;
 
         debug_printf("Creating new root node with key " T_FORMAT ".", *key);
     } else {
@@ -181,12 +249,15 @@ uint8_t insert_node(struct RBTree *rbtree, T *key, void *value)
         debug_printf("Inserting " T_FORMAT " with parent " T_FORMAT ".", *key, *(previous->key));
     }
 
+    fix_tree_insert(new_node, rbtree);
+
     rbtree->node_count++;
     return RB_TREE_SUCCESS;
 }
 
 #if RB_TREE_DUPLICATE_KEYS == RB_TREE_DUPLICATE_OVERRIDE_EXTERN
-uint8_t override_value(struct RBTree *rbtree, T *key, void *value) {
+uint8_t override_value(struct RBTree *rbtree, T *key, void *value)
+{
     struct Node *node = NULL;
 
     uint8_t error = search_node(rbtree, key, &node);
@@ -200,7 +271,8 @@ uint8_t override_value(struct RBTree *rbtree, T *key, void *value) {
 }
 #endif
 
-void get_next_smallest(struct Node *start, struct Node **next_smallest) {
+void get_next_smallest(struct Node *start, struct Node **next_smallest)
+{
     struct Node *current  = start;
 
     while (current->right != NULL) {
@@ -210,7 +282,8 @@ void get_next_smallest(struct Node *start, struct Node **next_smallest) {
     *next_smallest = current;
 }
 
-void get_next_largest(struct Node *start, struct Node **next_smallest) {
+void get_next_largest(struct Node *start, struct Node **next_smallest)
+{
     struct Node *current  = start;
 
     while (current->left != NULL) {
@@ -284,6 +357,8 @@ uint8_t delete_node(struct RBTree* rbtree, T* key)
 
         _free_node(node_to_delete);
     }
+
+    fix_tree_delete(node_to_delete);
 
     rbtree->node_count--;
     return RB_TREE_SUCCESS;

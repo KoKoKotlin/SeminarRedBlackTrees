@@ -3,7 +3,7 @@ CC = gcc
 LIBS = -lm
 FLAGS = -Wall -Wextra
 
-OBJECTS = main.o rbtree.o stack.o
+OBJECTS = main.o rbtree.o stack.o visualize.o
 TARGET = rbtree.out
 
 all: FLAGS += -O3
@@ -25,6 +25,7 @@ shared:
 main.o : include/rbtree.h include/log.h
 rbtree.o : include/rbtree.h	include/log.h
 stack.o : include/log.h
+visualize.o: include/visualize.h
 
 %.o : %.c
 	$(CC) -c $(FLAGS) $<

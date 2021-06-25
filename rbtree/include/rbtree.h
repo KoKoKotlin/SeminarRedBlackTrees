@@ -19,6 +19,9 @@
 #define LEFT_ROTATE  0U
 #define RIGHT_ROTATE 1U
 
+#define RB_TREE_LEFT_CHILD  0U
+#define RB_TREE_RIGHT_CHILD 1U
+
 #define RB_TREE_SUCCESS             0U
 #define RB_TREE_OUT_OF_MEM          1U
 #define RB_TREE_KEY_ERROR           2U
