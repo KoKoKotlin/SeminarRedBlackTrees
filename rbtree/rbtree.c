@@ -5,7 +5,8 @@
 #include "include/rbtree.h"
 #include "include/stack.h"
 
-uint8_t get_direction(struct Node *start_node) {
+uint8_t get_direction(struct Node *start_node)
+{
     // convention when deleting nodes
     struct Node *parent = start_node->parent;
     if (parent == NULL) return RB_TREE_NULL_ERROR;
@@ -95,7 +96,8 @@ struct Node* get_uncle(struct Node *start)
     else return grandparent->left;
 }
 
-uint8_t get_color(struct Node *node) {
+uint8_t get_color(struct Node *node)
+{
     return (node == NULL || node->color == RB_TREE_BLACK) ? RB_TREE_BLACK : RB_TREE_RED;
 }
 
@@ -299,7 +301,8 @@ void get_next_smallest(struct Node *start, struct Node **next_smallest)
     *next_smallest = current;
 }
 
-void swap(void **v1, void **v2) {
+void swap(void **v1, void **v2)
+{
     void *temp = *v1;
     *v1 = *v2;
     *v2 = temp;
@@ -313,14 +316,16 @@ struct Node* get_sibling(struct Node *node)
     return (get_direction(node) == RB_TREE_LEFT_CHILD) ? node->parent->right : node->parent->left;
 }
 
-struct Node* get_nephew(struct Node *node) {
+struct Node* get_nephew(struct Node *node)
+{
     if (get_sibling(node) == NULL) return NULL;
 
     if (get_direction(node) == RB_TREE_LEFT_CHILD) return get_sibling(node)->right;
     else return get_sibling(node)->left;
 }
 
-struct Node* get_niece(struct Node *node) {
+struct Node* get_niece(struct Node *node)
+{
     if (get_sibling(node) == NULL) return NULL;
 
     if (get_direction(node) == RB_TREE_LEFT_CHILD) return get_sibling(node)->left;
@@ -352,7 +357,8 @@ struct Node* swap_to_leaf(struct Node *node_to_delete)
     return leaf;
 }
 
-void fix_tree(struct Node *x, struct RBTree *rbtree) {
+void fix_tree(struct Node *x, struct RBTree *rbtree)
+{
     while (1) {
         if (x->parent == NULL) {
             break;
