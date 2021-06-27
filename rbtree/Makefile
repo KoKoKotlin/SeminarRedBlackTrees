@@ -9,8 +9,11 @@ TARGET = rbtree.out
 all: FLAGS += -O3
 all: $(TARGET)
 
-debug: FLAGS += -DDEBUG -g -ggdb
+debug: FLAGS += -g -ggdb
 debug: $(TARGET)
+
+debugOutput: FLAGS += -DDEBUG
+debugOutput: debug
 
 log: debug
 log:

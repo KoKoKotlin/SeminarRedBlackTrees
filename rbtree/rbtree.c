@@ -5,6 +5,14 @@
 #include "include/rbtree.h"
 #include "include/stack.h"
 
+uint8_t get_direction(struct Node *start_node) {
+    // convention when deleting nodes
+    struct Node *parent = start_node->parent;
+    if (parent == NULL) return RB_TREE_NULL_ERROR;
+
+    return (parent->left == start_node) ? RB_TREE_LEFT_CHILD : RB_TREE_RIGHT_CHILD;
+}
+
 struct RBTree* create_tree()
 {
     struct RBTree *rbtree = (struct RBTree*)malloc(sizeof(struct RBTree));
@@ -20,19 +28,6 @@ struct RBTree* create_tree()
     debug_print("Created new RBTree.");
 
     return rbtree;
-}
-
-void free_tree(struct RBTree *rbtree)
-{
-    if (rbtree == NULL) {
-        debug_print("Given tree was null! Aborting...");
-        return;
-    }
-
-    postorder_traversel(rbtree, &_free_node);
-    free(rbtree);
-
-    debug_print("Freed the rbtree.");
 }
 
 struct Node* _create_node(T *key, void *value)
@@ -56,26 +51,32 @@ struct Node* _create_node(T *key, void *value)
 
 void _free_node(struct Node *node)
 {
-    debug_printf("Freeing node with key " T_FORMAT ".", *(node->key));
+    debug_printf("Freeing node with key " T_FORMAT " key left: " T_FORMAT " key right: " T_FORMAT ".", *(node->key), (node->left != NULL) ? *(node->left->key) : 0xFFFF, (node->right != NULL) ? *(node->right->key) : 0xFFFF);
 
     // key and value must be heap allocated
-    free(node->key);
-    free(node->value);
+    if (node->key != NULL) free(node->key);
+    if (node->value != NULL) free(node->value);
 
     free(node);
+}
+
+void free_tree(struct RBTree *rbtree)
+{
+    if (rbtree == NULL) {
+        debug_print("Given tree was null! Aborting...");
+        return;
+    }
+
+    postorder_traversel(rbtree, &_free_node);
+    free(rbtree);
+
+    debug_print("Freed the rbtree.");
 }
 
 struct Node* get_grandparent(struct Node *start)
 {
     if (start->parent != NULL) return start->parent->parent;
     else return NULL;
-}
-
-uint8_t get_direction(struct Node *start_node) {
-    struct Node *parent = start_node->parent;
-    if (parent == NULL) return RB_TREE_NULL_ERROR;
-
-    return (parent->left == start_node) ? RB_TREE_LEFT_CHILD : RB_TREE_RIGHT_CHILD;
 }
 
 struct Node* get_uncle(struct Node *start)
@@ -92,6 +93,10 @@ struct Node* get_uncle(struct Node *start)
 
     if (grandparent->left == parent) return grandparent->right;
     else return grandparent->left;
+}
+
+uint8_t get_color(struct Node *node) {
+    return (node == NULL || node->color == RB_TREE_BLACK) ? RB_TREE_BLACK : RB_TREE_RED;
 }
 
 void color_flip(struct Node *start_node)
@@ -119,22 +124,26 @@ void rotate(struct Node *start_node, uint8_t direction, struct RBTree *rbtree)
             if (start_node->parent->left == start_node) start_node->parent->left = child;
             else start_node->parent->right = child;
         }
-        
+
         start_node->right = child->left;
+        if (start_node->right) start_node->right->parent = start_node;
+
         child->left = start_node;
         start_node->parent = child;
         debug_printf("Did left rotate at node " T_FORMAT ".", *(start_node->key));
-    } else if (direction == RIGHT_ROTATE) { 
+    } else if (direction == RIGHT_ROTATE) {
         struct Node *child = start_node->left;
         if (start_node == rbtree->root) rbtree->root = child;
         child->parent = start_node->parent;
-        
+
         if (start_node->parent != NULL) {
             if (start_node->parent->left == start_node) start_node->parent->left = child;
             else start_node->parent->right = child;
         }
 
         start_node->left = child->right;
+        if (start_node->left) start_node->left->parent = start_node;
+
         child->right = start_node;
         start_node->parent = child;
         debug_printf("Did right rotate at node " T_FORMAT ".", *(start_node->key));
@@ -143,8 +152,8 @@ void rotate(struct Node *start_node, uint8_t direction, struct RBTree *rbtree)
     if (rbtree->root->color == RB_TREE_RED) rbtree->root->color = RB_TREE_BLACK;
 }
 
-void fix_tree_insert(struct Node *start_node, struct RBTree *rbtree) {
-
+void fix_tree_insert(struct Node *start_node, struct RBTree *rbtree)
+{
     struct Node *current = start_node;
     struct Node *parent = start_node->parent;
     while (parent != NULL && parent->color == RB_TREE_RED && current->color == RB_TREE_RED) {
@@ -153,7 +162,7 @@ void fix_tree_insert(struct Node *start_node, struct RBTree *rbtree) {
         uint8_t parent_direction = get_direction(parent);
         struct Node *uncle = get_uncle(current);
 
-        if (uncle == NULL || uncle->color == RB_TREE_BLACK) { // rotate
+        if (get_color(uncle) == RB_TREE_BLACK) { // rotate
             if ((parent_direction == RB_TREE_RIGHT_CHILD && parent->left  == current)
              || (parent_direction == RB_TREE_LEFT_CHILD  && parent->right == current)) {
                 rotate(parent, parent_direction, rbtree);
@@ -166,9 +175,7 @@ void fix_tree_insert(struct Node *start_node, struct RBTree *rbtree) {
                 grandparent->color = RB_TREE_RED;
                 break;
             }
-        }
-
-        if (uncle->color == RB_TREE_RED) {  // color flip: P + U == RED
+        } else if (get_color(uncle) == RB_TREE_RED) {  // color flip: P + U == RED
             color_flip(current);
 
             current = get_grandparent(current);
@@ -179,10 +186,6 @@ void fix_tree_insert(struct Node *start_node, struct RBTree *rbtree) {
 
     // re-color the root
     rbtree->root->color = RB_TREE_BLACK;
-}
-
-void fix_tree_delete(struct Node *start_node) {
-
 }
 
 uint8_t insert_node(struct RBTree *rbtree, T *key, void *value)
@@ -201,7 +204,7 @@ uint8_t insert_node(struct RBTree *rbtree, T *key, void *value)
 
     if (new_node == NULL) {
         debug_print("new_node was NULL! Aborting.");
-        return RB_TREE_OUT_OF_MEM;
+        exit(RB_TREE_OUT_OF_MEM);
     }
 
     if (rbtree->root == NULL) {
@@ -242,8 +245,11 @@ uint8_t insert_node(struct RBTree *rbtree, T *key, void *value)
 
         debug_printf("Needed to search %zu nodes!", count);
 
-        if (*key < *(previous->key)) previous->left = new_node;
-        else previous->right = new_node;
+        if (*key < *(previous->key)) {
+            previous->left = new_node;
+        } else {
+            previous->right = new_node;
+        }
         new_node->parent = previous;
 
         debug_printf("Inserting " T_FORMAT " with parent " T_FORMAT ".", *key, *(previous->key));
@@ -271,6 +277,17 @@ uint8_t override_value(struct RBTree *rbtree, T *key, void *value)
 }
 #endif
 
+void get_next_largest(struct Node *start, struct Node **next_largest)
+{
+    struct Node *current  = start;
+
+    while (current->left != NULL) {
+        current = current->left;
+    }
+
+    *next_largest = current;
+}
+
 void get_next_smallest(struct Node *start, struct Node **next_smallest)
 {
     struct Node *current  = start;
@@ -282,18 +299,90 @@ void get_next_smallest(struct Node *start, struct Node **next_smallest)
     *next_smallest = current;
 }
 
-void get_next_largest(struct Node *start, struct Node **next_smallest)
-{
-    struct Node *current  = start;
-
-    while (current->left != NULL) {
-        current = current->left;
-    }
-
-    *next_smallest = current;
+void swap(void **v1, void **v2) {
+    void *temp = *v1;
+    *v1 = *v2;
+    *v2 = temp;
 }
 
-// TODO: test this function again, bc of new parent pointer
+struct Node* get_sibling(struct Node *node)
+{
+    struct Node *parent = node->parent;
+    if (parent == NULL) return NULL;
+
+    return (get_direction(node) == RB_TREE_LEFT_CHILD) ? node->parent->right : node->parent->left;
+}
+
+struct Node* get_nephew(struct Node *node) {
+    if (get_sibling(node) == NULL) return NULL;
+
+    if (get_direction(node) == RB_TREE_LEFT_CHILD) return get_sibling(node)->right;
+    else return get_sibling(node)->left;
+}
+
+struct Node* get_niece(struct Node *node) {
+    if (get_sibling(node) == NULL) return NULL;
+
+    if (get_direction(node) == RB_TREE_LEFT_CHILD) return get_sibling(node)->left;
+    else return get_sibling(node)->right;
+}
+
+struct Node* swap_to_leaf(struct Node *node_to_delete)
+{
+    struct Node *leaf;
+
+    if (node_to_delete->left != NULL) {
+        struct Node *next_smallest =  NULL;
+        get_next_smallest(node_to_delete->left, &next_smallest);
+        leaf = next_smallest;
+
+        swap((void**)&node_to_delete->key, (void**)&next_smallest->key);
+        swap(&node_to_delete->value, &next_smallest->value);
+    } else if (node_to_delete->right != NULL) {
+        struct Node *next_largest =  NULL;
+        get_next_largest(node_to_delete->right, &next_largest);
+        leaf = next_largest;
+
+        swap((void**)&node_to_delete->key, (void**)&next_largest->key);
+        swap(&node_to_delete->value, &next_largest->value);
+    } else {
+        leaf = node_to_delete;
+    }
+
+    return leaf;
+}
+
+void fix_tree(struct Node *x, struct RBTree *rbtree) {
+    while (1) {
+        if (x->parent == NULL) break;
+        else if (get_color(x) == RB_TREE_RED) break;
+        else if (get_color(get_sibling(x)) == RB_TREE_RED) {
+            debug_print("case 1");
+            x->parent->color = RB_TREE_RED;
+            get_sibling(x)->color = RB_TREE_BLACK;
+            rotate(x->parent, get_direction(x), rbtree);
+        } else if (get_color(get_nephew(x)) == RB_TREE_RED) {
+            debug_print("case 2");
+            get_sibling(x)->color = x->parent->color;
+            x->parent->color = RB_TREE_BLACK;
+            get_nephew(x)->color = RB_TREE_BLACK;
+            rotate(x->parent, get_direction(x), rbtree);
+            break;
+        } else if (get_color(get_niece(x)) == RB_TREE_RED) {
+            debug_print("case 3");
+            get_niece(x)->color = RB_TREE_BLACK;
+            get_sibling(x)->color = RB_TREE_RED;
+            rotate(get_sibling(x), !get_direction(x), rbtree);
+        } else {
+            debug_print("case 4");
+            get_sibling(x)->color = RB_TREE_RED;
+            x = x->parent;
+        }
+    }
+
+    x->color = RB_TREE_BLACK;
+}
+
 uint8_t delete_node(struct RBTree* rbtree, T* key)
 {
     if (rbtree == NULL) {
@@ -314,53 +403,20 @@ uint8_t delete_node(struct RBTree* rbtree, T* key)
         return RB_TREE_KEY_ERROR;
     }
 
-    struct Node *parent_node = node_to_delete->parent;
+    struct Node *x = swap_to_leaf(node_to_delete);
+    fix_tree(x, rbtree);
 
-    if (node_to_delete->left != NULL) {
-        struct Node *next_smallest =  NULL;
-        get_next_smallest(node_to_delete->left, &next_smallest);
-
-        debug_printf("Deleting node " T_FORMAT " and replacing with the next smallest node " T_FORMAT ".", *(node_to_delete->key), *(next_smallest->key));
-
-        free(node_to_delete->key);
-        free(node_to_delete->value);
-
-        node_to_delete->key = next_smallest->key;
-        node_to_delete->value = next_smallest->value;
-
-        if (next_smallest->parent == node_to_delete) next_smallest->parent->left = NULL;
-        else next_smallest->parent->right = NULL;
-
-        free(next_smallest);
-    } else if (node_to_delete->right != NULL) {
-        struct Node *next_largest =  NULL;
-        get_next_largest(node_to_delete->right, &next_largest);
-
-        debug_printf("Deleting node " T_FORMAT " and replacing with the next largest node " T_FORMAT ".", *(node_to_delete->key), *(next_largest->key));
-
-        free(node_to_delete->key);
-        free(node_to_delete->value);
-
-        node_to_delete->key = next_largest->key;
-        node_to_delete->value = next_largest->value;
-
-        if (next_largest->parent == node_to_delete) next_largest->parent->right = NULL;
-        else next_largest->parent->left = NULL;
-        free(next_largest);
-    } else {
-        debug_printf("Deleting node " T_FORMAT " with no chidren.", *(node_to_delete->key));
-
-        if (parent_node != NULL) {
-            if (*(parent_node->key) < *(node_to_delete->key)) parent_node->right = NULL;
-            else parent_node->left = NULL;
-        }
-
-        _free_node(node_to_delete);
+    if (rbtree->root == x) {
+        _free_node(rbtree->root);
+        rbtree->root = NULL;
+        return RB_TREE_SUCCESS;
     }
 
-    fix_tree_delete(node_to_delete);
+    if (get_direction(x) == RB_TREE_LEFT_CHILD) x->parent->left = NULL;
+    else x->parent->right = NULL;
 
-    rbtree->node_count--;
+    _free_node(x);
+
     return RB_TREE_SUCCESS;
 }
 
@@ -413,6 +469,8 @@ uint8_t preorder_traversel(struct RBTree *rbtree, void (*action)(struct Node*))
         return RB_TREE_NULL_ERROR;
     }
 
+    if (rbtree->root == NULL) return RB_TREE_SUCCESS;
+
     struct Node *current = NULL;
     struct Stack *stack = create_stack((size_t)log2((double)rbtree->node_count) + 1);
     push(stack, rbtree->root);
@@ -442,6 +500,8 @@ uint8_t postorder_traversel(struct RBTree *rbtree, void (*action)(struct Node*))
         debug_print("Given tree was null! Aborting...");
         return RB_TREE_NULL_ERROR;
     }
+
+    if (rbtree->root == NULL) return RB_TREE_SUCCESS;
 
     struct Node *last = NULL;
     struct Node *current = rbtree->root;
@@ -479,6 +539,8 @@ uint8_t inorder_traversel(struct RBTree *rbtree, void (*action)(struct Node*))
         debug_print("Given tree was null! Aborting...");
         return RB_TREE_NULL_ERROR;
     }
+
+    if (rbtree->root == NULL) return RB_TREE_SUCCESS;
 
     struct Node *current = rbtree->root;
     struct Stack *stack = create_stack((size_t)log2((double)rbtree->node_count) + 1);

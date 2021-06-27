@@ -29,88 +29,34 @@ void print_key(struct Node *node) {
 void test_rbtree() {
     struct RBTree *rbtree = create_tree();
 
-    T *one  = malloc_elem(1);
-    T *two  = malloc_elem(2);
-    T *three  = malloc_elem(3);
-    T *four  = malloc_elem(4);
-    T *five  = malloc_elem(5);
-    T *six  = malloc_elem(6);
-    T *seven  = malloc_elem(7);
-    T *ten = malloc_elem(10);
-
-    // creating balanced tree
-    insert_node(rbtree, four, NULL);
-    insert_node(rbtree, two, NULL);
-    insert_node(rbtree, one, NULL);
-    ascii_art_tree(rbtree);
-    printf("\n");
-    insert_node(rbtree, three, NULL);
-    ascii_art_tree(rbtree);
-    printf("\n");
-    insert_node(rbtree, six, NULL);
-    ascii_art_tree(rbtree);
-    printf("\n");
-    insert_node(rbtree, five, NULL);
-    ascii_art_tree(rbtree);
-    printf("\n");
-    insert_node(rbtree, seven, NULL);
-    ascii_art_tree(rbtree);
-    printf("\n");
-    insert_node(rbtree, ten, NULL);
+    srand(time(NULL));
+    // fill stack with lots of heap allocated random numbers
+    for (size_t u = 0; u < 18; u++) {
+        T *elem = malloc_elem((T)u);
+        insert_node(rbtree, elem, NULL);
+    }
 
     ascii_art_tree(rbtree);
-/*
-    T key = 3;
-    struct Node *snode = NULL;
-    search_node(rbtree, &key, &snode);
 
-    preorder_traversel(rbtree, &print_key);
-    printf("\n");
-
-    inorder_traversel(rbtree, &print_key);
-    printf("\n");
-
-    postorder_traversel(rbtree, &print_key);
-    printf("\n");
-
-    delete_node(rbtree, &key);
-    inorder_traversel(rbtree, &print_key);
-    printf("\n");
-
-    key = 2;
-    delete_node(rbtree, &key);
-    inorder_traversel(rbtree, &print_key);
-    printf("\n");
-
-    key = 5;
-    delete_node(rbtree, &key);
-    inorder_traversel(rbtree, &print_key);
-    printf("\n");
-
-    key = 6;
-    delete_node(rbtree, &key);
-    inorder_traversel(rbtree, &print_key);
-    printf("\n");
-
+    for (int key = 0; key < 18; key++) {
+        delete_node(rbtree, &key);
+        ascii_art_tree(rbtree);
+    }
 
     srand(time(NULL));
     // fill stack with lots of heap allocated random numbers
     for (size_t u = 0; u < 10000; u++) {
-        T *elem = malloc_elem((T)rand());
+        int *elem = (int*)malloc(sizeof(int));
+        *elem = u;
+
         insert_node(rbtree, elem, NULL);
     }
 
-    preorder_traversel(rbtree, &print_key);
-    printf("\n");
+    for (int u = 10000 - 1; u >= 0; u--) {
+        int key = rand() % 10000;
+        delete_node(rbtree, &key);
+    }
 
-    inorder_traversel(rbtree, &print_key);
-    printf("\n");
-
-    postorder_traversel(rbtree, &print_key);
-    printf("\n");
-
-    insert_node(rbtree, one, NULL);
-*/
     free_tree(rbtree);
 }
 

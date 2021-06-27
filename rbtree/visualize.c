@@ -3,31 +3,56 @@
 #include "include/visualize.h"
 #include "include/rbtree.h"
 
-// source: https://www.techiedelight.com/level-order-traversal-binary-tree/
-uint8_t printLevel(struct Node *root, size_t level, size_t height)
+#define COUNT 7
+#define COLOR_RED   "\x1b[1;31m"
+#define COLOR_BLUE  "\x1b[1;34m"
+#define COLOR_PINK  "\x1b[1;35m"
+#define COLOR_WHITE "\x1b[1;37m"
+
+size_t find_tree_height(struct Node *current, size_t h)
+{
+    if (current == NULL) return h;
+
+    size_t left = find_tree_height(current->left, h + 1);
+    size_t right = find_tree_height(current->right, h + 1);
+
+    return (left > right) ? left : right;
+}
+
+// source: https://www.geeksforgeeks.org/print-binary-tree-2-dimensions/
+void printTree(struct Node *root, int space)
 {
     if (root == NULL) {
-        printf("  ");
-        return 0;
+        return;
     }
 
-    if (level == 1) {
-        if (root->color == RB_TREE_RED) printf("\033[1;31m" T_FORMAT " ", *(root->key));
-        else printf("\033[1;34m" T_FORMAT " ", *(root->key));
-        return 1;
-    }
+    // Increase distance between levels
+    space += COUNT;
 
-    uint8_t left = printLevel(root->left, level - 1, height);
-    uint8_t right = printLevel(root->right, level - 1, height);
-    return left + right;
+    // Process right child first
+    printTree(root->right, space);
+
+    // Print current node after space
+    // count
+    printf("\n");
+    for (int i = COUNT; i < space; i++)
+        printf(" ");
+
+    if (root->color == RB_TREE_BLACK) printf(COLOR_BLUE T_FORMAT " ", *(root->key));
+    else printf(COLOR_RED T_FORMAT " ", *(root->key));
+
+    if (root->parent != NULL) printf(COLOR_PINK T_FORMAT "\n", *(root->parent->key));
+    else printf("\n");
+
+    // Process left child
+    printTree(root->left, space);
 }
 
 void ascii_art_tree(struct RBTree *rbtree)
 {
-    size_t level = 1;
-    size_t height = (size_t)ceil(log2(rbtree->node_count));
-    while (printLevel(rbtree->root, level, height)) {
-        level++;
-        printf("\n");
-    }
+    size_t height = find_tree_height(rbtree->root, 0);
+    printf("Tree height: %zu\n", height);
+
+    printTree(rbtree->root, 0);
+    printf(COLOR_WHITE);
 }
