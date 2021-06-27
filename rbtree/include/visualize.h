@@ -5,4 +5,4 @@
 
 void ascii_art_tree(struct RBTree*);
 
-#endif
+#endif  // RBTREE_INCLUDE_VISUALIZE_H_

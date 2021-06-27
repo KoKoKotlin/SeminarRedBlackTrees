@@ -54,5 +54,5 @@ void ascii_art_tree(struct RBTree *rbtree)
     printf("Tree height: %zu\n", height);
 
     printTree(rbtree->root, 0);
-    printf(COLOR_WHITE);
+    printf("%s", COLOR_WHITE);
 }

@@ -157,12 +157,12 @@ void fix_tree_insert(struct Node *start_node, struct RBTree *rbtree)
     struct Node *current = start_node;
     struct Node *parent = start_node->parent;
     while (parent != NULL && parent->color == RB_TREE_RED && current->color == RB_TREE_RED) {
-        if (parent->parent == NULL) break; // special case for root node
+        if (parent->parent == NULL) break;  // special case for root node
 
         uint8_t parent_direction = get_direction(parent);
         struct Node *uncle = get_uncle(current);
 
-        if (get_color(uncle) == RB_TREE_BLACK) { // rotate
+        if (get_color(uncle) == RB_TREE_BLACK) {  // rotate
             if ((parent_direction == RB_TREE_RIGHT_CHILD && parent->left  == current)
              || (parent_direction == RB_TREE_LEFT_CHILD  && parent->right == current)) {
                 rotate(parent, parent_direction, rbtree);
@@ -354,9 +354,11 @@ struct Node* swap_to_leaf(struct Node *node_to_delete)
 
 void fix_tree(struct Node *x, struct RBTree *rbtree) {
     while (1) {
-        if (x->parent == NULL) break;
-        else if (get_color(x) == RB_TREE_RED) break;
-        else if (get_color(get_sibling(x)) == RB_TREE_RED) {
+        if (x->parent == NULL) {
+            break;
+        } else if (get_color(x) == RB_TREE_RED) {
+            break;
+        } else if (get_color(get_sibling(x)) == RB_TREE_RED) {
             debug_print("case 1");
             x->parent->color = RB_TREE_RED;
             get_sibling(x)->color = RB_TREE_BLACK;
