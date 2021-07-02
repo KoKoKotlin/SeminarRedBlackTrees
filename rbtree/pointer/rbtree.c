@@ -2,8 +2,8 @@
 #include <math.h>
 
 #include "include/log.h"
-#include "include/rbtree.h"
 #include "include/stack.h"
+#include "include/rbtree.h"
 
 uint8_t get_direction(struct Node *start_node)
 {
@@ -29,12 +29,6 @@ struct RBTree* create_tree()
     debug_print("Created new RBTree.");
 
     return rbtree;
-}
-
-struct Node* get_parent(struct Node *node)
-{
-    if (node == NULL) return NULL;
-    return node->parent;
 }
 
 struct Node* _create_node(T *key, void *value)
@@ -82,7 +76,7 @@ void free_tree(struct RBTree *rbtree)
 
 struct Node* get_grandparent(struct Node *start)
 {
-    if (get_parent(start) != NULL) return get_parent(get_parent(start));
+    if (start->parent != NULL) return start->parent->parent;
     else return NULL;
 }
 

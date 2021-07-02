@@ -1,11 +1,13 @@
-#ifndef RBTREE_INCLUDE_RBTREE_H_
-#define RBTREE_INCLUDE_RBTREE_H_
+#ifndef RBTREE_INCLUDE_RBTREE_ARRAY_H_
+#define RBTREE_INCLUDE_RBTREE_ARRAY_H_
 
 #include <inttypes.h>
 
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+
+#include "dynamic_array.h"
 
 #define T int
 #define T_FORMAT "%d"
@@ -43,13 +45,12 @@ struct Node {
 
     struct Node *left;
     struct Node *right;
-    struct Node *parent;    // simplifies a lot of the algorithms
 
     uint8_t color;
 };
 
 struct RBTree {
-    struct Node *root;
+    struct DynArray *nodes;
 
     size_t node_count;
 };
@@ -71,4 +72,4 @@ uint8_t preorder_traversel(struct RBTree*,  void (*)(struct Node*));
 uint8_t postorder_traversel(struct RBTree*, void (*)(struct Node*));
 uint8_t inorder_traversel(struct RBTree*,   void (*)(struct Node*));
 
-#endif  // RBTREE_INCLUDE_RBTREE_H_
+#endif  // RBTREE_INCLUDE_RBTREE_ARRAY_H_

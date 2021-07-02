@@ -1,7 +1,6 @@
 #include <math.h>
 
 #include "include/visualize.h"
-#include "include/rbtree.h"
 
 #define COUNT 7
 #define COLOR_RED   "\x1b[1;31m"

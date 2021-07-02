@@ -3,11 +3,10 @@ CC = gcc
 LIBS = -lm
 FLAGS = -Wall -Wextra
 
-OBJECTS = main.o stack.o visualize.o
+OBJECTS = main.o stack.o visualize.o rbtree.o
 TARGET = rbtree.out
 
 all: FLAGS += -O3
-all: TARGET += rbtree_pointer.o
 all: $(TARGET)
 
 debug: FLAGS += -g -ggdb
