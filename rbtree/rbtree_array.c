@@ -158,6 +158,7 @@ void fix_tree_insert(struct Node *start_node, struct RBTree *rbtree)
 {
     struct Node *current = start_node;
     struct Node *parent = start_node->parent;
+
     while (parent != NULL && parent->color == RB_TREE_RED && current->color == RB_TREE_RED) {
         if (parent->parent == NULL) break;  // special case for root node
 
@@ -227,7 +228,7 @@ uint8_t insert_node(struct RBTree *rbtree, T *key, void *value)
                 count++;
             #endif
 
-            #if RB_TREE_DUPLICATE_KEYS == RB_TREE_DUPLICATE_FORBID || RB_TREE_DUPLICATE_KEYS == RB_TREE_DUPLICATE_ALLOW_EXTERN
+            #if RB_TREE_DUPLICATE_KEYS == RB_TREE_DUPLICATE_FORBID || RB_TREE_DUPLICATE_KEYS == RB_TREE_DUPLICATE_OVERRIDE_EXTERN
                 if (*(current->key) == *key) {
                     debug_printf("Key " T_FORMAT " already exists. Aborting...", *key);
                     return RB_TREE_DUPLICATE_KEY_ERROR;
@@ -357,37 +358,60 @@ struct Node* swap_to_leaf(struct Node *node_to_delete)
     return leaf;
 }
 
-void fix_tree(struct Node *x, struct RBTree *rbtree)
+void fix_tree_delete(struct Node *x, struct RBTree *rbtree)
 {
+    // at this point we can assume that the node to remove x is a leaf or at least a half leaf
     while (1) {
         if (x->parent == NULL) {
+            // when removing the root -> nothing to do bc the empty tree is a valid red black tree
             break;
         } else if (get_color(x) == RB_TREE_RED) {
+            // when removing a red leaf -> nothing to do because the black height on the branch is unchanged
             break;
         } else if (get_color(get_sibling(x)) == RB_TREE_RED) {
+            // case 1: the sibling of the node to remove is red
             debug_print("case 1");
+
+            // color the parent red and color the sibling black
             x->parent->color = RB_TREE_RED;
             get_sibling(x)->color = RB_TREE_BLACK;
+
+            // afterwards rotate the sibling into the position of the parent such that the black gets pushed up the tree
             rotate(x->parent, get_direction(x), rbtree);
         } else if (get_color(get_nephew(x)) == RB_TREE_RED) {
+            // case 2: the sibling is black and the nephew is red
             debug_print("case 2");
+            // change the siblings color to the parents color and color the parent black
             get_sibling(x)->color = x->parent->color;
             x->parent->color = RB_TREE_BLACK;
+
+            // color the nephew black and rotate it into the parents position to push the black up the tree
             get_nephew(x)->color = RB_TREE_BLACK;
             rotate(x->parent, get_direction(x), rbtree);
+
+            // after this case, the red black trees properties have been recovered and the node x can be removed safely
             break;
         } else if (get_color(get_niece(x)) == RB_TREE_RED) {
+            // case 3: the sibling is black, the nephew is black and the niece is red
             debug_print("case 3");
+
+            // color the niece black and the sibling red
             get_niece(x)->color = RB_TREE_BLACK;
             get_sibling(x)->color = RB_TREE_RED;
+
+            // rotate the niece to the parents position to push up the black up the tree
             rotate(get_sibling(x), !get_direction(x), rbtree);
         } else {
+            // case 4: all nodes mentioned above are black
             debug_print("case 4");
+
+            // color the sibling red and continue the algorithm at the parent of x
             get_sibling(x)->color = RB_TREE_RED;
             x = x->parent;
         }
     }
 
+    // color the x after the algorithm black to recover the properties
     x->color = RB_TREE_BLACK;
 }
 
@@ -412,7 +436,7 @@ uint8_t delete_node(struct RBTree* rbtree, T* key)
     }
 
     struct Node *x = swap_to_leaf(node_to_delete);
-    fix_tree(x, rbtree);
+    fix_tree_delete(x, rbtree);
 
     if (rbtree->root == x) {
         _free_node(rbtree->root);

@@ -5,11 +5,10 @@
 
 #define STACK_SUCCESS               0U
 #define STACK_OUT_OF_MEM            1U
-#define STACK_READ_FROM_EMTPY_STACK  2U
+#define STACK_READ_FROM_EMTPY_STACK 2U
 
 #define STACK_NOT_EMTPY 0U
-#define STACK_EMPTY 1U
-
+#define STACK_EMPTY     1U
 
 struct Stack {
     size_t current_position;
