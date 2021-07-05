@@ -6,33 +6,7 @@
 #include "include/visualize.h"
 #include "include/binary.h"
 
-#define NUMBER_OF_KEYS 10
-
-void test_stack();
-void test_rbtree();
-void test_bin_tree();
-
-int main()
-{
-    int keys[NUMBER_OF_KEYS];
-    int searches[NUMBER_OF_KEYS];
-
-    for (size_t i = 0; i < NUMBER_OF_KEYS; i++) {
-        keys[i] = rand() % NUMBER_OF_KEYS;
-        searches[i] = rand() % NUMBER_OF_KEYS;
-    }
-
-    // test_stack();
-    clock_t start = clock();
-    test_rbtree();
-    printf("Time Red-Black-Tree: %.6fms, number of elements: %d \n", (double)(clock() - start) / (CLOCKS_PER_SEC / 1000), NUMBER_OF_KEYS);
-
-    start = clock();
-    test_bin_tree();
-    printf("Time normal bintree: %.6fms, number of elements: %d \n", (double)(clock() - start) / (CLOCKS_PER_SEC / 1000), NUMBER_OF_KEYS);
-
-    return 0;
-}
+#define CLOCKS_PER_MILLIS (CLOCKS_PER_SEC / 1000)
 
 T* malloc_elem(T elem) {
     T* elem_ptr = (T*)malloc(sizeof(T));
@@ -44,39 +18,75 @@ void print_key(struct Node *node) {
     printf(T_FORMAT " ", *(node->key));
 }
 
-void test_rbtree(int keys[], int searches[]) {
+void gen_rand_data(int *keys, int *searches, size_t number_of_keys)
+{
+    for (size_t i = 0; i < number_of_keys; i++) {
+        keys[i] = rand() % number_of_keys;
+        searches[i] = rand() % number_of_keys;
+    }
+}
+
+void gen_degenerate_data(int *keys, int *searches, size_t number_of_keys)
+{
+    for (size_t i = 0; i < number_of_keys; i++) {
+        keys[i] = i;
+        searches[i] = i;
+    }
+}
+
+void test_rbtree(int keys[], int searches[], size_t arr_size) {
     struct RBTree *rbtree = create_tree();
+    clock_t start;
 
     srand(time(NULL));
-    // fill stack with lots of heap allocated random numbers
-    for (size_t u = 0; u < NUMBER_OF_KEYS; u++) {
+    start = clock();
+    for (size_t u = 0; u < arr_size; u++) {
         int *elem = (int*)malloc(sizeof(int));
-        *elem = u;
+        if (elem == NULL) printf("ALERT!!\n");
+        *elem = keys[u];
 
         insert_node(rbtree, elem, NULL);
     }
+    printf("%lf ", (double)(clock() - start) / CLOCKS_PER_MILLIS);
+    printf("%zu ", find_tree_height(rbtree->root, 0));
 
-
+    start = clock();
+    for (size_t i = 0; i < arr_size; i++) {
+        struct Node* node;
+        search_node(rbtree, &searches[i], &node);
+    }
+    printf("%lf ", (double)(clock() - start) / CLOCKS_PER_MILLIS);
 
     // for (int u = NUMBER_OF_KEYS - 1; u >= 0; u--) {
     //     int key = rand() % NUMBER_OF_KEYS;
     //     delete_node(rbtree, &key);
     // }
 
+    start = clock();
     free_tree(rbtree);
+    printf("%f", (double)(clock() - start) / CLOCKS_PER_MILLIS);
 }
 
-void test_bin_tree(int keys[], int searches[]) {
+void test_bin_tree(int keys[], int searches[], size_t arr_size) {
     struct BinTree *binTree = create_bin_tree();
+    clock_t start;
 
     srand(time(NULL));
-    // fill stack with lots of heap allocated random numbers
-    for (size_t u = 0; u < NUMBER_OF_KEYS; u++) {
+    start = clock();
+    for (size_t u = 0; u < arr_size; u++) {
         int *elem = (int*)malloc(sizeof(int));
-        *elem = rand() % NUMBER_OF_KEYS;
+        *elem = keys[u];
 
         insert_bin_node(binTree, elem);
     }
+    printf("%f ", (double)(clock() - start) / CLOCKS_PER_MILLIS);
+    printf("%zu ", find_tree_height_bin(binTree->root, 0));
+
+    start = clock();
+    for (size_t i = 0; i < arr_size; i++) {
+        search_bin(binTree, &searches[i]);
+    }
+    printf("%f ", (double)(clock() - start) / CLOCKS_PER_MILLIS);
 
     // for (int u = NUMBER_OF_KEYS - 1; u >= 0; u--) {
     //     int key = rand() % NUMBER_OF_KEYS;
@@ -84,7 +94,9 @@ void test_bin_tree(int keys[], int searches[]) {
     //     delete_bin_node(binTree, &key);
     // }
 
+    start = clock();
     free_bin_tree(binTree);
+    printf("%f\n", (double)(clock() - start) / CLOCKS_PER_MILLIS);
 }
 
 
@@ -137,4 +149,24 @@ void test_stack() {
 
     // free the data structure
     free_stack(stack);
+}
+
+int main()
+{
+    for (size_t i = 0; i < 10; i++) {
+        size_t number_of_keys = (i + 1) * 10000;
+
+        int *keys = (int*)malloc(sizeof(int) * number_of_keys);
+        int *searches = (int*)malloc(sizeof(int) * number_of_keys);
+
+        gen_rand_data(keys, searches, number_of_keys);
+
+        test_rbtree(keys, searches, number_of_keys);
+        printf(" ");
+        test_bin_tree(keys, searches, number_of_keys);
+
+        free(keys);
+        free(searches);
+    }
+    return 0;
 }

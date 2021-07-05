@@ -1,5 +1,3 @@
-#include <math.h>
-
 #include "include/visualize.h"
 
 #define COUNT 7
@@ -14,6 +12,16 @@ size_t find_tree_height(struct Node *current, size_t h)
 
     size_t left = find_tree_height(current->left, h + 1);
     size_t right = find_tree_height(current->right, h + 1);
+
+    return (left > right) ? left : right;
+}
+
+size_t find_tree_height_bin(struct BinNode *current, size_t h)
+{
+    if (current == NULL) return h;
+
+    size_t left = find_tree_height_bin(current->left, h + 1);
+    size_t right = find_tree_height_bin(current->right, h + 1);
 
     return (left > right) ? left : right;
 }

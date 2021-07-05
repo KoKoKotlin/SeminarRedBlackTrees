@@ -5,13 +5,19 @@
 #include "include/stack.h"
 #include "include/rbtree.h"
 
+#define NULLPTR SIZE_MAX
+
+#define get_left(nodes, index) (get(nodes, get_left_index(index)))
+#define get_right(nodes, index) (get(nodes, get_left_right(index)))
+#define get_parent(nodes, index) (get(nodes, get_parent_index(index)))
+#define get_grandparent(nodes, index) (get(nodes, get_grandparent_index(index)))
+#define get_uncle(nodes, index) (get(nodes, get_uncle_index(nodes, index)))
+
 uint8_t get_direction(struct Node *start_node)
 {
-    // convention when deleting nodes
-    struct Node *parent = start_node->parent;
-    if (parent == NULL) return RB_TREE_NULL_ERROR;
+    if (index == 0 || index == NULLPTR) return RB_TREE_NULL_ERROR;
 
-    return (parent->left == start_node) ? RB_TREE_LEFT_CHILD : RB_TREE_RIGHT_CHILD;
+    return (index % 2 == 1) ? RB_TREE_LEFT_CHILD : RB_TREE_RIGHT_CHILD;
 }
 
 struct RBTree* create_tree()
@@ -24,6 +30,7 @@ struct RBTree* create_tree()
     }
 
     rbtree->root = NULL;
+    rbtree->nodes = create_dyn_array();
     rbtree->node_count = 0;
 
     debug_print("Created new RBTree.");
@@ -42,9 +49,6 @@ struct Node* _create_node(T *key, void *value)
 
     debug_printf("Creating new node with key " T_FORMAT ".", *key);
 
-    new_node->key   = key;
-    new_node->value = value;
-    new_node->parent = NULL;
     new_node->color = RB_TREE_RED;
 
     return new_node;
@@ -68,32 +72,44 @@ void free_tree(struct RBTree *rbtree)
         return;
     }
 
-    postorder_traversel(rbtree, &_free_node);
+    free_dyn_array(rbtree->nodes);
     free(rbtree);
 
     debug_print("Freed the rbtree.");
 }
 
-struct Node* get_grandparent(struct Node *start)
+size_t get_left_index(size_t index)
 {
-    if (start->parent != NULL) return start->parent->parent;
-    else return NULL;
+    return index * 2 + 1;
 }
 
-struct Node* get_uncle(struct Node *start)
+size_t get_right_index(size_t index)
 {
-    struct Node *parent = start->parent;
-    if (parent == NULL) {
-        return NULL;
-    }
+    return index * 2 + 2;
+}
 
-    struct Node *grandparent = parent->parent;
-    if (grandparent == NULL) {
-        return NULL;
-    }
+size_t get_parent_index(size_t index)
+{
+    if (index == 0 || index == NULLPTR) return NULLPTR;
+    return (int)(index / 2.0);
+}
 
-    if (grandparent->left == parent) return grandparent->right;
-    else return grandparent->left;
+size_t get_grandparent_index(size_t index)
+{
+    if (index == 0 || index == NULLPTR) return NULLPTR;
+
+    return get_parent_index(get_parent_index(index));
+}
+
+size_t get_uncle_index(struct DynArray *nodes, size_t index)
+{
+    if (index == 0 || index == NULLPTR) return NULLPTR;
+
+    size_t grandparent_index = get_grandparent_index(index);
+    if (grandparent_index == 0 || grandparent_index == NULLPTR) return NULLPTR;
+
+    if (get_direction(get_parent_index(index)) == RB_TREE_LEFT_CHILD) return get_left_index(grandparent_index);
+    else return get_right_index(grandparent_index);
 }
 
 uint8_t get_color(struct Node *node)
@@ -104,7 +120,7 @@ uint8_t get_color(struct Node *node)
 void color_flip(struct Node *start_node)
 {
     // color flip parent, uncle, and grandparent
-    struct Node *parent = start_node->parent;
+    struct Node *parent = get_parent(start_node);
     struct Node *grandparent = get_grandparent(start_node);
     struct Node *uncle = get_uncle(start_node);
 
@@ -115,11 +131,12 @@ void color_flip(struct Node *start_node)
     debug_printf("Did color flip at node " T_FORMAT ".", *(start_node->key));
 }
 
-void rotate(struct Node *start_node, uint8_t direction, struct RBTree *rbtree)
+void rotate(size_t pivot_index, uint8_t direction, struct RBTree *rbtree)
 {
     if (direction == LEFT_ROTATE) {
-        struct Node *child = start_node->right;
-        if (start_node == rbtree->root) rbtree->root = child;
+        struct Node *child = get_right(pivot_index);
+
+        if (index == 0) rbtree->root = child;
         child->parent = start_node->parent;
 
         if (start_node->parent != NULL) {

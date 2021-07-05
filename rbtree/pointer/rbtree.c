@@ -16,7 +16,7 @@ uint8_t get_direction(struct Node *start_node)
 
 struct RBTree* create_tree()
 {
-    struct RBTree *rbtree = (struct RBTree*)malloc(sizeof(struct RBTree));
+    struct RBTree *rbtree = (struct RBTree*)calloc(sizeof(struct RBTree), 1);
 
     if (rbtree == NULL) {
         debug_print("Couldn't allocate memory for rbtree!");
@@ -33,7 +33,7 @@ struct RBTree* create_tree()
 
 struct Node* _create_node(T *key, void *value)
 {
-    struct Node *new_node = (struct Node*)malloc(sizeof(struct Node));
+    struct Node *new_node = (struct Node*)calloc(sizeof(struct Node), 1);
 
     if (new_node == NULL) {
         debug_print("Can't allocate memory for new node!");
@@ -42,10 +42,10 @@ struct Node* _create_node(T *key, void *value)
 
     debug_printf("Creating new node with key " T_FORMAT ".", *key);
 
-    new_node->key   = key;
-    new_node->value = value;
+    new_node->key    = key;
+    new_node->value  = value;
     new_node->parent = NULL;
-    new_node->color = RB_TREE_RED;
+    new_node->color  = RB_TREE_RED;
 
     return new_node;
 }
@@ -162,18 +162,17 @@ void fix_tree_insert(struct Node *start_node, struct RBTree *rbtree)
     while (parent != NULL && parent->color == RB_TREE_RED && current->color == RB_TREE_RED) {
         if (parent->parent == NULL) break;  // special case for root node
 
-        uint8_t parent_direction = get_direction(parent);
         struct Node *uncle = get_uncle(current);
 
+        // TODO: test
         if (get_color(uncle) == RB_TREE_BLACK) {  // rotate
-            if ((parent_direction == RB_TREE_RIGHT_CHILD && parent->left  == current)
-             || (parent_direction == RB_TREE_LEFT_CHILD  && parent->right == current)) {
-                rotate(parent, parent_direction, rbtree);
+            if (get_direction(parent) != get_direction(current)) {
+                rotate(parent, get_direction(parent), rbtree);
                 current = parent;
                 parent = current->parent;
             } else {
                 struct Node *grandparent = get_grandparent(current);
-                rotate(grandparent, !parent_direction, rbtree);
+                rotate(grandparent, !get_direction(parent), rbtree);
                 parent->color = RB_TREE_BLACK;
                 grandparent->color = RB_TREE_RED;
                 break;
@@ -243,7 +242,7 @@ uint8_t insert_node(struct RBTree *rbtree, T *key, void *value)
             #endif
 
             previous = current;
-            current  = (*key < *(current->key)) ? previous->left : previous->right;
+            current  = (*key < *(previous->key)) ? previous->left : previous->right;
         }
 
         debug_printf("Needed to search %zu nodes!", count);

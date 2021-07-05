@@ -9,7 +9,19 @@ struct DynArray* create_dyn_array()
     arr->nodes = malloc(sizeof(struct Node) * 8);
     arr->current_size = 8;
 
+    memset(arr->nodes, 0, sizeof(struct Node) * 8);
+
     return arr;
+}
+
+void free_dyn_array(struct DynArray *arr)
+{
+    for (size_t i = 0; i < arr->current_size; i++) {
+        struct Node *node = get(arr, i);
+        if (node != NULL) _free_node(node);
+    }
+
+    free(arr);
 }
 
 void _resize(struct DynArray *arr, size_t index)
@@ -33,11 +45,11 @@ void insert(struct DynArray *arr, size_t index, struct Node *elem)
     arr->nodes[index] = *elem;
 }
 
-void get(struct DynArray *arr, size_t index, struct Node **elem)
+struct Node *get(struct DynArray *arr, size_t index)
 {
     if (index >= arr->current_size) {
-        *elem = NULL;
+        return NULL;
     }
 
-    *elem = &arr->nodes[index];
+    return arr->nodes + index;
 }

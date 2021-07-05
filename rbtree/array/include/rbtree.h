@@ -40,17 +40,14 @@ struct Node;
 
 struct Node {
     void *value;
-
     T *key;
-
-    struct Node *left;
-    struct Node *right;
 
     uint8_t color;
 };
 
 struct RBTree {
     struct DynArray *nodes;
+    struct Node *root;
 
     size_t node_count;
 };
@@ -59,6 +56,7 @@ struct RBTree* create_tree();
 struct Node* _create_node(T*, void*);
 
 void free_tree(struct RBTree*);
+void _free_node(struct Node*);
 
 uint8_t insert_node(struct RBTree*, T*, void*);
 uint8_t delete_node(struct RBTree*, T*);
