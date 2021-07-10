@@ -491,6 +491,11 @@ uint8_t search_node(struct RBTree* rbtree, T* key, struct Node **node)
     return RB_TREE_SUCCESS;
 }
 
+size_t _calc_worst_case_height(struct RBTree *rbtree)
+{
+    return (size_t)(2 * log2((double)rbtree->node_count) + 2);
+}
+
 uint8_t preorder_traversel(struct RBTree *rbtree, void (*action)(struct Node*))
 {
     // root - left - right
@@ -503,7 +508,7 @@ uint8_t preorder_traversel(struct RBTree *rbtree, void (*action)(struct Node*))
     if (rbtree->root == NULL) return RB_TREE_SUCCESS;
 
     struct Node *current = NULL;
-    struct Stack *stack = create_stack((size_t)log2((double)rbtree->node_count) + 1);
+    struct Stack *stack = create_stack(_calc_worst_case_height(rbtree));
     push(stack, rbtree->root);
 
     debug_printf("Starting preorder traversel with tree with root key " T_FORMAT ".", *(rbtree->root->key));
@@ -536,7 +541,7 @@ uint8_t postorder_traversel(struct RBTree *rbtree, void (*action)(struct Node*))
 
     struct Node *last = NULL;
     struct Node *current = rbtree->root;
-    struct Stack *stack = create_stack((size_t)log2((double)rbtree->node_count) + 1);
+    struct Stack *stack = create_stack(_calc_worst_case_height(rbtree));
 
     debug_printf("Starting postorder traversel with tree with root key " T_FORMAT ".", *(rbtree->root->key));
 
@@ -574,7 +579,7 @@ uint8_t inorder_traversel(struct RBTree *rbtree, void (*action)(struct Node*))
     if (rbtree->root == NULL) return RB_TREE_SUCCESS;
 
     struct Node *current = rbtree->root;
-    struct Stack *stack = create_stack((size_t)log2((double)rbtree->node_count) + 1);
+    struct Stack *stack = create_stack(_calc_worst_case_height(rbtree));
 
     debug_printf("Starting inorder traversel with tree with root key " T_FORMAT ".", *(rbtree->root->key));
 
