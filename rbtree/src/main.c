@@ -153,7 +153,7 @@ void test_stack() {
 
 int main()
 {
-    for (size_t i = 0; i < 10; i++) {
+    for (size_t i = 0; i < 100; i++) {
         size_t number_of_keys = (i + 1) * 10000;
 
         int *keys = (int*)malloc(sizeof(int) * number_of_keys);

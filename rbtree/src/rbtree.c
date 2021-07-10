@@ -491,42 +491,36 @@ uint8_t search_node(struct RBTree* rbtree, T* key, struct Node **node)
     return RB_TREE_SUCCESS;
 }
 
-size_t _calc_worst_case_height(struct RBTree *rbtree)
+void _preorder_traversel(struct Node *current, void (*action)(struct Node*))
 {
-    return (size_t)(2 * log2((double)rbtree->node_count) + 2);
+    // root - left - right
+    if (current == NULL) return;
+
+    action(current);
+    _preorder_traversel(current->left, action);
+    _preorder_traversel(current->right, action);
 }
 
 uint8_t preorder_traversel(struct RBTree *rbtree, void (*action)(struct Node*))
 {
-    // root - left - right
 
     if (rbtree == NULL) {
         debug_print("Given tree was null! Aborting...");
         return RB_TREE_NULL_ERROR;
     }
 
-    if (rbtree->root == NULL) return RB_TREE_SUCCESS;
-
-    struct Node *current = NULL;
-    struct Stack *stack = create_stack(_calc_worst_case_height(rbtree));
-    push(stack, rbtree->root);
-
-    debug_printf("Starting preorder traversel with tree with root key " T_FORMAT ".", *(rbtree->root->key));
-
-    while (!is_stack_empty(stack)) {
-        pop(stack, &current);
-        action(current);
-
-        if (current->right != NULL)
-            push(stack, current->right);
-
-        if (current->left != NULL)
-            push(stack, current->left);
-    }
-
-    free_stack(stack);
+    _preorder_traversel(rbtree->root, action);
 
     return RB_TREE_SUCCESS;
+}
+
+void _postorder_traversel(struct Node *current, void (*action)(struct Node*))
+{
+    if (current == NULL) return;
+    
+    _postorder_traversel(current->left, action);
+    _postorder_traversel(current->right, action);
+    action(current);
 }
 
 uint8_t postorder_traversel(struct RBTree *rbtree, void (*action)(struct Node*))
@@ -537,65 +531,29 @@ uint8_t postorder_traversel(struct RBTree *rbtree, void (*action)(struct Node*))
         return RB_TREE_NULL_ERROR;
     }
 
-    if (rbtree->root == NULL) return RB_TREE_SUCCESS;
-
-    struct Node *last = NULL;
-    struct Node *current = rbtree->root;
-    struct Stack *stack = create_stack(_calc_worst_case_height(rbtree));
-
-    debug_printf("Starting postorder traversel with tree with root key " T_FORMAT ".", *(rbtree->root->key));
-
-    while (current != NULL || !is_stack_empty(stack)) {
-        if (current != NULL) {
-            push(stack, current);
-            current = current->left;
-        } else {
-            struct Node *stack_node;
-            peek(stack, &stack_node);
-
-            if (stack_node->right != NULL && last != stack_node->right) {
-                current = stack_node->right;
-            } else {
-                action(stack_node);
-                pop(stack, &last);
-            }
-        }
-    }
-
-    free_stack(stack);
+    _postorder_traversel(rbtree->root, action);
 
     return RB_TREE_SUCCESS;
 }
 
+void _inorder_traversel(struct Node *current, void (*action)(struct Node*))
+{
+    if (current == NULL) return;
+
+    _inorder_traversel(current->left, action);
+    action(current);
+    _inorder_traversel(current->right, action);
+}
+
 uint8_t inorder_traversel(struct RBTree *rbtree, void (*action)(struct Node*))
 {
-    // left - root - right
 
     if (rbtree == NULL) {
         debug_print("Given tree was null! Aborting...");
         return RB_TREE_NULL_ERROR;
     }
 
-    if (rbtree->root == NULL) return RB_TREE_SUCCESS;
-
-    struct Node *current = rbtree->root;
-    struct Stack *stack = create_stack(_calc_worst_case_height(rbtree));
-
-    debug_printf("Starting inorder traversel with tree with root key " T_FORMAT ".", *(rbtree->root->key));
-
-    while (current != NULL || !is_stack_empty(stack)) {
-        if (current != NULL) {
-            push(stack, current);
-            current = current->left;
-        } else {
-            struct Node *stack_node;
-            pop(stack, &stack_node);
-            action(stack_node);
-            current = stack_node->right;
-        }
-    }
-
-    free_stack(stack);
+    _inorder_traversel(rbtree->root, action);
 
     return RB_TREE_SUCCESS;
 }
