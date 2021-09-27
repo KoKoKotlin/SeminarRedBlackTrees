@@ -3,6 +3,7 @@
     - Wozu Bäume?
     - Warum balancieren?
     - Warum Red-Black-Algorithmus
+
 2. Trees
     - Def Binärbaum
     - Def sortierter Binärbaum
@@ -14,4 +15,8 @@
         - Regeln (einfach)
         - Umformungsregeln
     - Verwendung
-    - Implementierung / Benchmarking
+
+4. Implementierung / Benchmarking
+    - Generics (`define int T`) -> only one possible implemantation per program
+    - Data storage (`void*`)
+    - some application of the tree (maybe self implemented -> key value store for example)

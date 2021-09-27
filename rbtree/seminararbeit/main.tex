@@ -1,23 +1,88 @@
-\documentclass[a4paper,11pt]{scrartcl}
-
+\documentclass[11pt]{article}
+\usepackage{amsmath, amssymb, amscd, amsthm, amsfonts}
 \usepackage{graphicx}
-\usepackage{xcolor}
-\usepackage[utf8]{inputenc}
-\usepackage{amsmath,amssymb,amsthm} 
-\usepackage[round]{natbib}
-\usepackage[left=20mm,top=20mm]{geometry}
-\usepackage{algorithmic}
-\usepackage{subcaption}
-\usepackage{mathpazo}
-\usepackage{booktabs}
 \usepackage{hyperref}
-\usepackage{marvosym}
+\usepackage{acronym}
+\usepackage[utf8]{inputenc}
+\usepackage{glossaries}
 
-\title{Seminararbeit C Seminar}
+\oddsidemargin 0pt
+\evensidemargin 0pt
+\marginparwidth 40pt
+\marginparsep 10pt
+\topmargin -20pt
+\headsep 10pt
+\textheight 8.7in
+\textwidth 6.65in
+\linespread{1.2}
+
+% for centering the title page
+\usepackage{titling}
+\renewcommand\maketitlehooka{\null\mbox{}\vfill}
+\renewcommand\maketitlehookd{\vfill\null}
+
+% ------- glossary -------
+% to build the glossary when changed run the build make_glossaries.cmd file first
+\makeglossaries
+
+\newglossaryentry{computer}
+{
+  name=computer,
+  description={is a programmable machine that receives input,
+               stores and manipulates data, and provides
+               output in a useful format}
+}
+\newacronym{gcd}{GCD}{Greatest Common Divisor}
+
+\newacronym{lcm}{LCM}{Least Common Multiple}
+% ------- glossary -------
+
+\title{Seminararbeit Red-Black Trees}
 \author{Yannik Höll}
 \date{\today}
 
 \begin{document}
-\maketitle
+
+\begin{titlingpage}
+    \maketitle
+\end{titlingpage}
+\pagebreak
+
+\tableofcontents
+\pagebreak
+
+\glsaddall
+\printglossary 
+\pagebreak
+
+\section{Einleitung}
+
+The \Gls{computer}
+Spass
+
+\section{Zugriffsprimitiven}
+
+\section{Implementierungsvarianten}
+
+\section{Benchmarks}
+
+\section{Speicher- und Zeitkomplexität}
+
+\section{Verwendung}
+
+\pagebreak
+\bibliographystyle{alpha}
+\bibliography{references} % see references.bib for bibliography management
 
 \end{document}
+
+% for citation:
+% \cite{aad} for simple citation
+% \cite[S. 20]{aad} for citation with page number(s)
+
+
+% for acronyms:
+% \acp{KDE} % K Desktop Environments (KDEs)
+% \acsp{KDE} % KDEs
+% \acfp{KDE} % K Desktop Environments (KDEs)
+% \aclp{KDE} % K Desktop Environments
