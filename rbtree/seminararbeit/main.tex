@@ -3,7 +3,46 @@
 \usepackage{graphicx}
 \usepackage{hyperref}
 \usepackage{acronym}
+\usepackage{listings}
+\usepackage[margin=2cm]{geometry}
+
+% change language to german
 \usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[ngerman]{babel}
+\usepackage{hyphenat}
+% ---------
+
+% for code style
+\usepackage{xcolor}
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2
+}
+
+\lstset{style=mystyle}
+% ----------------------
+
 \usepackage{glossaries}
 
 \oddsidemargin 0pt
@@ -21,23 +60,106 @@
 \renewcommand\maketitlehooka{\null\mbox{}\vfill}
 \renewcommand\maketitlehookd{\vfill\null}
 
+% usesul macros
+\newcommand{\lstin}[1]{\lstinline[language=C]{#1}}
+\newcommand{\cpl}{\textbf{C}$\;$}
+
 % ------- glossary -------
 % to build the glossary when changed run the build make_glossaries.cmd file first
 \makeglossaries
 
-\newglossaryentry{computer}
+% TODO: sources for definitions
+\newglossaryentry{bm}
 {
-  name=computer,
-  description={is a programmable machine that receives input,
-               stores and manipulates data, and provides
-               output in a useful format}
+  name=Benchmark,
+  description={Test für die Zeitkomplexität und Speicherkomplextät von Software},
 }
-\newacronym{gcd}{GCD}{Greatest Common Divisor}
 
-\newacronym{lcm}{LCM}{Least Common Multiple}
+\newglossaryentry{dt}
+{
+  name=Datenstruktur,
+  description={Strukturen, die Daten effizient speichern und einen effizienten Zugriff auf diese erlauben \cite[S. VIII]{aad}},
+  plural={Datenstrukturen}
+}
+
+\newglossaryentry{sc}
+{
+  name=Quelltext,
+  description={Gesamtheit der Anweisungen eines Computerprogramms},
+  plural={Quelltexte}
+}
+
+\newglossaryentry{wc}
+{
+  name={Worst Case},
+  description={Konfiguration der Daten in einer Datenstruktur, bei der sie am schlechtesten arbeitet (z.B. besonders viel Zeit zur Datenverarbeitung benötigt oder besonders viel Speicher benötigt)},
+  plural={Worst Cases}
+}
+
+\newglossaryentry{gns}
+{
+  name={Generic},
+  description={TODO},
+  plural={Generics}
+}
+
+\newglossaryentry{hp}
+{
+  name={Heap},
+  description={TODO},
+  plural={Heaps}
+}
+
+\newglossaryentry{sts}
+{
+  name={Struct},
+  description={TODO},
+  plural={Structs}
+}
+
+\newglossaryentry{uns}
+{
+  name={Union},
+  description={TODO},
+  plural={Unions}
+}
+
+\newglossaryentry{mc}
+{
+  name={Macro},
+  description={TODO},
+  plural={Macros}
+}
+
+\newglossaryentry{st}
+{
+  name={Stack},
+  description={TODO},
+  plural={Stacks}
+}
+
+\newglossaryentry{sof}
+{
+  name={Stackoverflow},
+  description={TODO},
+  plural={Stackoverflows}
+}
+
+\newglossaryentry{rec}
+{
+  name={Rekursion},
+  description={Überbegriff für Programme oder Funktionen, die sich selbst aufrufen oder durch sich selbst definiert sind. \cite[S. 52]{aic} (z.B. $n! := n * (n - 1)! \wedge 0! := 1 \forall n \in \mathbb{N}$ )},
+  plural={Rekurionen}
+}
+
+% ------- acronyms -------
+\newacronym{rbt}{RBT}{Red Black Tree}
+\newacronym{bt}{BT}{Binary Tree}
+
+
 % ------- glossary -------
 
-\title{Seminararbeit Red-Black Trees}
+\title{\textbf{Seminararbeit Red-Black Trees}}
 \author{Yannik Höll}
 \date{\today}
 
@@ -57,20 +179,89 @@
 
 \section{Einleitung}
 
-The \Gls{computer}
-Spass
+% Einführungssätze
 
-\section{Zugriffsprimitiven}
+% Motivation der Datenstruktur
+Eine Möglichkeit Daten so geordnet zu speichern sind so genannte Baumdatenstrukturen. Diese Speichern Werte geordnet nach einem bestimmten Schlüssel. 
+Eine sehr einfache Baumimplemntierung ist der \gls{bt} welcher jeweils nur 2 Abzweigungen pro Knoten besitzt (rigorose Baumdefinition in Kapitel \ref{def}).
+Leider hat diese naiive Variante der Datenstruktur einige Probleme, welche vorallem beim Einfügen der Daten in geordneter Reigenfolge entstehen.
+Um diese Probleme zu umgehen kann man die Algorithmen zum Einfügen und Entfernen neuer Datensätze so anpassen, dass die Baumstruktur performanter wird.
+Ein möglicher besserer Ansatz sind die \glspl{rbt}.   
 
-\section{Implementierungsvarianten}
+% Inhalt der Arbeit
+Diese Arbeit beschreibt wie sich \gls{rbt} von normalen \glspl{bt} unterscheiden. Es wird ausführlich beschrieben, wie normale \glspl{bt} funktionieren und wie man 
+ihre Algorithmen erweitert um \glspl{rbt} zu erhalten.
+Dazu wurden jeweils beide \glspl{dt} in der Programmiersprache \cpl implementiert. Auf den jeweiligen \gls{sc} wird auch eingegangen um auf bestimmte Schwierigkeiten und Besonderheiten und den Implementierungen einzugehen.
+Zudem werden die Ergenisse von \gls{bm} analysiert, welche zeigen sollen, dass \glspl{rbt} tatsächlich besser Laufzeiteigenschaften haben als
+die Standimplementierung der \glspl{bt}.
+Außerdem wird auf die Speicher- und Zeitkomplexität der beiden \glspl{dt} eingegangen und wie sich vorallem der \gls{rbt} im \gls{wc} verhält. 
+\pagebreak
 
-\section{Benchmarks}
+\section{Definition Binary Tree \& Red Black Tree} \label{def}
+\pagebreak
 
-\section{Speicher- und Zeitkomplexität}
+\section{Implementierung}
+Wie schon in den vorhergenden Kapiteln beschrieben, handelt es sich bei den Bäumen um eine generische Datenstruktur, in die der Nutzer beliebig Daten mit einem bestimmten Schlüssel einfügen kann.
 
-\section{Verwendung}
+Die Implementierung stellt deswegen 3 Funktionen bereit, mit denen man nach einem bestimmten Schlüssel im Baum suchen kann, man einen neuen Schlüssel zusammen mit einem Datensatz einfügen kann und man einen Schlüssel und den Datensatz wieder aus dem Baum löschen kann.
+
+\subsection{Generics in C}
+Bei der Implementierung in \cpl gab es dabei einige Schwierigkeiten, die man lösen musste. Es beginnt damit, dass \cpl keine objekt-orientierte Programmiersprache ist und keine eingebaute Möglichkeit für \glspl{gns} hat.
+Nun kann man dieses Problem auf verschiedene Weisen lösen. Den Wert, der bei jedem Knoten des Baums gespeichert werden soll, lässt sich ganz simple aus Void-Pointer (\lstin{void*}) implementieren, sodass man die Daten beispielsweise auf dem \gls{hp} ablegen kann
+und mithilfe eines Casts den Pointer der Daten (z.B. \lstin{int*}) zu \lstin{void*} umwandeln kann. Das erlaubt es, beliebige Datentypen und sogar \gls{sts} in den Baum einzufügen. 
+Diese Variante ist möglich, da die Nutzerdaten auf die Suche nach einem Knoten keinen Einfluss haben.
+
+Anders ist es bei der Implementierung der Schlüssel. Hier muss sichergestellt sein, dass diese untereinander vergleichbar sind, sodass man die Suche, wie im Kapitel \ref{def} beschrieben, durchführen kann.
+Man könnte Gebrauch von \glspl{uns} in \cpl machen, in denen man die numerischen Datentypen als mögliche Schlüssel anbietet.
+
+\begin{lstlisting}[language=C]
+union RBTreeKey {
+  char c;
+  short s;
+  int i;
+  long long l;
+  float f;
+  double d;
+}
+\end{lstlisting}
+
+Zusätzlich müsste man dazu noch angeben, welchen Datentyp man in seinem Code nutzt (z.B. mithilfe einer \gls{mc}). Dieser Ansatz ist allerdings sehr unflexibel, weil man auf die Datentypen, die im \lstin{union RBTreeKey} vom Programmierer festgelegt sind, beschränkt ist.
+
+Ein bessere Ansatz ist es, eine \gls{mc} zu definieren, die den Typen der Schlüssel definiert. Zusätzlich kann man noch eine 2. \gls{mc} definieren, die einen Vergleichsoperator bereitstellt.
+Das ermöglicht es beliebige Datentypen als Schlüssel zu verwenden (sogar \glspl{sts}), solange man die Vergleichsmacro definieren kann.
+
+\begin{lstlisting}[language=C]
+#define T int
+#define TLESS(x, y) ((x) < (y))
+\end{lstlisting}
+
+Genau diese Implementierung wurde auch gewählt. Im Usercode muss nur der Typ T und die Vergleichsoperation TLESS definiert werden. Einziger Nachteil ist, dass man im selben \gls{sc} nicht meherere verschidene Varianten von Schlüsseldatentypen nutzen kann.
+
+\subsection{Suche nach Knoten}
+Eine der wichtigsten Operation, auf die auch später das Suchen und das Löschen von Knoten auf aufbaut ist die Suche im Baum. Diese ist normalerweise als Rekursiver Algorithmus definiert, lässt sich aber auch ziemlich einfach iterativ implementieren.
+Grundsätzlich wurde in der Implementierung auf Rekursion versichtet und immer entweder ein iterativer Ansatz verwendet oder ein selbst implementierter \gls{st}, um \glspl{sof} zu vermeiden und die zustätzlich Laufzeit 
+und die zusätzlichen Laufzeitkosten, die Rekursion mit sich bringt, zu umgehen.  fff
+
+\subsection{Einfügen von Knoten}
+
+\subsection{Löschen von Knoten}
+
+\subsection{Generische Baumtraversierung}
 
 \pagebreak
+
+\section{Implementierungsvarianten}
+\pagebreak
+
+\section{Benchmarks}
+\pagebreak
+
+\section{Speicher- und Zeitkomplexität}
+\pagebreak
+
+\section{Verwendung}
+\pagebreak
+
 \bibliographystyle{alpha}
 \bibliography{references} % see references.bib for bibliography management
 
@@ -80,9 +271,18 @@ Spass
 % \cite{aad} for simple citation
 % \cite[S. 20]{aad} for citation with page number(s)
 
+% for acronyms and glossary ref:
+% https://en.wikibooks.org/wiki/LaTeX/Glossary
+% \gls{acro-name}
 
-% for acronyms:
-% \acp{KDE} % K Desktop Environments (KDEs)
-% \acsp{KDE} % KDEs
-% \acfp{KDE} % K Desktop Environments (KDEs)
-% \aclp{KDE} % K Desktop Environments
+% Listings Example:
+% \begin{lstlisting}[language=C]
+%         #include <stdio.h>
+%        
+%         int main(void)
+%         {
+%                 printf("Hello, World\n");
+%                 return EXIT_SUCCESS;
+%         }
+% \end{lstlisting}
+        
