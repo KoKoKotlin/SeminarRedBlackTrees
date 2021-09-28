@@ -55,20 +55,20 @@ struct RBTree {
 };
 
 struct RBTree* create_tree();
-struct Node* _create_node(T*, void*);
+struct Node* _create_node(T* key, void* value);
 
 void free_tree(struct RBTree*);
 
-uint8_t insert_node(struct RBTree*, T*, void*);
-uint8_t delete_node(struct RBTree*, T*);
-uint8_t search_node(struct RBTree*, T*, struct Node**);
+uint8_t insert_node(struct RBTree* rbtree, T* key, void* value);
+uint8_t delete_node(struct RBTree* rbtree, T* key);
+uint8_t search_node(struct RBTree* rbtree, T* key, struct Node** node);
 
 #if RB_TREE_DUPLICATE_KEYS == RB_TREE_DUPLICATE_ALLOW_EXTERN
-uint8_t override_value(struct RBTree*, T*, void*);
+uint8_t override_value(struct RBTree* rbtree, T* key, void* value);
 #endif
 
-uint8_t preorder_traversel(struct RBTree*,  void (*)(struct Node*));
-uint8_t postorder_traversel(struct RBTree*, void (*)(struct Node*));
-uint8_t inorder_traversel(struct RBTree*,   void (*)(struct Node*));
+uint8_t preorder_traversel(struct RBTree* rbtree,  void (*action)(struct Node*));
+uint8_t postorder_traversel(struct RBTree* rbtree, void (*action)(struct Node*));
+uint8_t inorder_traversel(struct RBTree* rbtree,   void (*action)(struct Node*));
 
 #endif  // RBTREE_INCLUDE_RBTREE_POINTER_H_
