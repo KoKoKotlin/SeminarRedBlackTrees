@@ -228,12 +228,12 @@ uint8_t insert_node(struct RBTree *rbtree, T *key, void *value)
             #endif
 
             #if RB_TREE_DUPLICATE_KEYS == RB_TREE_DUPLICATE_FORBID || RB_TREE_DUPLICATE_KEYS == RB_TREE_DUPLICATE_OVERRIDE_EXTERN
-                if (*(current->key) == *key) {
+                if (TEQUAL(*(current->key), *key)) {
                     debug_printf("Key " T_FORMAT " already exists. Aborting...", *key);
                     return RB_TREE_DUPLICATE_KEY_ERROR;
                 }
             #elif RB_TREE_DUPLICATE_KEYS == RB_TREE_DUPLICATE_OVERRIDE
-                if (*(current->key) == *key) {
+                if (TEQUAL(*(current->key), *key)) {
                     debug_printf("Key " T_FORMAT " already exists. Overriding value.", *key);
                     free(current->value);
                     current->value = value;
@@ -242,12 +242,12 @@ uint8_t insert_node(struct RBTree *rbtree, T *key, void *value)
             #endif
 
             previous = current;
-            current  = (*key < *(previous->key)) ? previous->left : previous->right;
+            current  = (TLESS(*key, *(previous->key))) ? previous->left : previous->right;
         }
 
         debug_printf("Needed to search %zu nodes!", count);
 
-        if (*key < *(previous->key)) {
+        if (TLESS(*key, *(previous->key))) {
             previous->left = new_node;
         } else {
             previous->right = new_node;
@@ -474,8 +474,8 @@ uint8_t search_node(struct RBTree* rbtree, T* key, struct Node **node)
             count++;
         #endif
 
-        if (*(current->key) == *(key)) break;
-        current = (*key < *(current->key)) ? current->left : current->right;
+        if (TEQUAL(*(current->key), *(key))) break;
+        current = (TLESS(*key, *(current->key))) ? current->left : current->right;
     }
 
     if (current == NULL) {

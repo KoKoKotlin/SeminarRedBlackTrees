@@ -8,7 +8,10 @@
 #include <string.h>
 
 #define T int
+#define TLESS(x, y) ((x) < (y))
+#define TEQUAL(x, y) ((x) == (y))
 #define T_FORMAT "%d"
+
 
 #define RB_TREE_TRUE    1U
 #define RB_TREE_FALSE   0U
