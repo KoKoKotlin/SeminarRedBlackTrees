@@ -3,8 +3,15 @@ CC = gcc
 LIBS = -lm
 FLAGS = -Wall -Wextra
 
-OBJECTS = main.o stack.o visualize.o rbtree.o binary.o
+OBJECTS = main.o stack.o visualize.o binary.o 
 TARGET = rbtree.out
+
+# for compiling the recursive version of the code
+ifeq ($(strip $(REC)), )
+OBJECTS += rbtree_s.o
+else
+OBJECTS += rbtree_h.o
+endif
 
 all: FLAGS += -O3
 all: $(TARGET)
@@ -22,11 +29,9 @@ log:
 $(TARGET) : $(OBJECTS)
 	$(CC) -o $(TARGET) $(OBJECTS) $(LIBS)
 
-shared:
-	echo "Unimplemented"
-
 main.o : include/rbtree.h include/log.h
-rbtree.o : include/rbtree.h	include/log.h
+rbtree_s.o : include/rbtree.h	include/log.h
+rbtree_h.o : include/rbtree.h	include/log.h
 stack.o : include/log.h
 visualize.o: include/visualize.h
 
@@ -35,4 +40,4 @@ visualize.o: include/visualize.h
 
 .PHONY : clean
 clean :
-	rm -rf $(TARGET) $(OBJECTS) log
+	rm -rf $(TARGET) $(OBJECTS) log rbtree_h.o rbtree_s.o
