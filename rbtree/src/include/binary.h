@@ -8,6 +8,9 @@
 #include "log.h"
 #include "stack.h"
 
+#define BIN_TREE_LEFT_CHILD  0U 
+#define BIN_TREE_RIGHT_CHILD 1U
+
 struct BinNode;
 
 struct BinNode {
@@ -29,6 +32,7 @@ void free_bin_tree(struct BinTree*);
 
 void insert_bin_node(struct BinTree*, int*);
 struct BinNode *search_bin(struct BinTree*, int*);
+void delete_bin_node(struct BinTree* tree, int* key);
 
 void postorder_traversel_bin(struct BinTree*, void (*)(struct BinNode*));
 

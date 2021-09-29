@@ -83,9 +83,93 @@ struct BinNode *search_bin(struct BinTree *tree, int *key)
     return NULL;
 }
 
+static void swap(void **v1, void **v2)
+{
+    void *temp = *v1;
+    *v1 = *v2;
+    *v2 = temp;
+}
+
+static uint8_t get_direction(struct BinNode *start_node)
+{
+    // convention when deleting nodes
+    struct BinNode *parent = start_node->parent;
+    if (parent == NULL) exit(EXIT_FAILURE);
+
+    return (parent->left == start_node) ? BIN_TREE_LEFT_CHILD : BIN_TREE_RIGHT_CHILD;
+}
+
+static void get_next_largest(struct BinNode *start, struct BinNode **next_largest)
+{
+    struct BinNode *current  = start;
+
+    while (current->left != NULL) {
+        current = current->left;
+    }
+
+    *next_largest = current;
+}
+
+static void get_next_smallest(struct BinNode *start, struct BinNode **next_smallest)
+{
+    struct BinNode *current  = start;
+
+    while (current->right != NULL) {
+        current = current->right;
+    }
+
+    *next_smallest = current;
+}
+
+static struct BinNode* _swap_to_leaf(struct BinNode *node_to_delete)
+{
+    struct BinNode *leaf;
+
+    if (node_to_delete->left != NULL) {
+        struct BinNode *next_smallest =  NULL;
+        get_next_smallest(node_to_delete->left, &next_smallest);
+        leaf = next_smallest;
+
+        swap((void**)&node_to_delete->key, (void**)&next_smallest->key);
+    } else if (node_to_delete->right != NULL) {
+        struct BinNode *next_largest =  NULL;
+        get_next_largest(node_to_delete->right, &next_largest);
+        leaf = next_largest;
+
+        swap((void**)&node_to_delete->key, (void**)&next_largest->key);
+    } else {
+        leaf = node_to_delete;
+    }
+
+    return leaf;
+}
+
+void delete_bin_node(struct BinTree* tree, int* key)
+{
+    struct BinNode *node_to_delete = search_bin(tree, key);
+
+    if (node_to_delete == NULL) {
+        debug_print("There is no node with the given key!");
+        return;
+    }
+
+    struct BinNode *x = _swap_to_leaf(node_to_delete);
+
+    if (tree->root == x) {
+        _free_bin_node(tree->root);
+        tree->root = NULL;
+        return;
+    }
+
+    if (get_direction(x) == BIN_TREE_LEFT_CHILD) x->parent->left = NULL;
+    else x->parent->right = NULL;
+
+    _free_bin_node(x);
+}
+
+
 void postorder_traversel_bin(struct BinTree *tree, void (*action)(struct BinNode*))
 {
-
     if (tree->root == NULL) return;
 
     struct BinNode *last = NULL;

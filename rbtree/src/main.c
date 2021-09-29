@@ -6,7 +6,21 @@
 #include "include/visualize.h"
 #include "include/binary.h"
 
-#define CLOCKS_PER_MILLIS (CLOCKS_PER_SEC / 1000)
+// benchmark output format: CSV insert_rb, search_rb, delete_rb, height_rb, insert_bin, search_bin, delete_bin, height_bin
+
+// source: https://stackoverflow.com/questions/6749621/how-to-create-a-high-resolution-timer-in-linux-to-measure-program-performance
+struct timespec diff(struct timespec start, struct timespec end)
+{
+    struct timespec temp;
+    if ((end.tv_nsec-start.tv_nsec)<0) {
+        temp.tv_sec = end.tv_sec-start.tv_sec-1;
+        temp.tv_nsec = 1000000000+end.tv_nsec-start.tv_nsec;
+    } else {
+        temp.tv_sec = end.tv_sec-start.tv_sec;
+        temp.tv_nsec = end.tv_nsec-start.tv_nsec;
+    }
+    return temp;
+}
 
 T* malloc_elem(T elem) {
     T* elem_ptr = (T*)malloc(sizeof(T));
@@ -36,137 +50,96 @@ void gen_degenerate_data(int *keys, int *searches, size_t number_of_keys)
 
 void test_rbtree(int keys[], int searches[], size_t arr_size) {
     struct RBTree *rbtree = create_tree();
-    clock_t start;
-
-    srand(time(NULL));
-    start = clock();
+    struct timespec time1, time2;
+    
+    clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &time1);
     for (size_t u = 0; u < arr_size; u++) {
         int *elem = (int*)malloc(sizeof(int));
-        if (elem == NULL) printf("ALERT!!\n");
         *elem = keys[u];
 
         insert_node(rbtree, elem, NULL);
     }
-    printf("%lf ", (double)(clock() - start) / CLOCKS_PER_MILLIS);
-    printf("%zu ", find_tree_height(rbtree->root, 0));
-
-    start = clock();
+    clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &time2);
+    printf("%ld ", diff(time1, time2).tv_nsec);
+    
+    clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &time1);
     for (size_t i = 0; i < arr_size; i++) {
         struct Node* node;
         search_node(rbtree, &searches[i], &node);
     }
-    printf("%lf ", (double)(clock() - start) / CLOCKS_PER_MILLIS);
-
-    // for (int u = NUMBER_OF_KEYS - 1; u >= 0; u--) {
-    //     int key = rand() % NUMBER_OF_KEYS;
-    //     delete_node(rbtree, &key);
-    // }
-
-    start = clock();
-    free_tree(rbtree);
-    printf("%f", (double)(clock() - start) / CLOCKS_PER_MILLIS);
+    clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &time2);
+    printf("%ld ", diff(time1, time2).tv_nsec);
+    
+    clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &time1);
+    for (int u = arr_size - 1; u >= 0; u--) {
+        int key = rand() % arr_size;
+        delete_node(rbtree, &key);
+    }
+    clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &time2);
+    printf("%ld ", diff(time1, time2).tv_nsec);
+    
+    printf("%zu ", find_tree_height(rbtree->root, 0));
 }
 
 void test_bin_tree(int keys[], int searches[], size_t arr_size) {
     struct BinTree *binTree = create_bin_tree();
-    clock_t start;
-
-    srand(time(NULL));
-    start = clock();
+    struct timespec time1, time2;
+    
+    clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &time1);
     for (size_t u = 0; u < arr_size; u++) {
         int *elem = (int*)malloc(sizeof(int));
         *elem = keys[u];
 
         insert_bin_node(binTree, elem);
     }
-    printf("%f ", (double)(clock() - start) / CLOCKS_PER_MILLIS);
-    printf("%zu ", find_tree_height_bin(binTree->root, 0));
+    clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &time2);
+    printf("%ld ", diff(time1, time2).tv_nsec);
 
-    start = clock();
+    clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &time1);
     for (size_t i = 0; i < arr_size; i++) {
         search_bin(binTree, &searches[i]);
     }
-    printf("%f ", (double)(clock() - start) / CLOCKS_PER_MILLIS);
+    clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &time2);
+    printf("%ld ", diff(time1, time2).tv_nsec);
 
-    // for (int u = NUMBER_OF_KEYS - 1; u >= 0; u--) {
-    //     int key = rand() % NUMBER_OF_KEYS;
-    //     ascii_art_tree((struct RBTree*)binTree);
-    //     delete_bin_node(binTree, &key);
-    // }
+    clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &time1);
+    for (int u = arr_size - 1; u >= 0; u--) {
+        int key = rand() % arr_size;
+        delete_bin_node(binTree, &key);
+    }
+    clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &time2);
+    printf("%ld ", diff(time1, time2).tv_nsec);
 
-    start = clock();
-    free_bin_tree(binTree);
-    printf("%f\n", (double)(clock() - start) / CLOCKS_PER_MILLIS);
+    printf("%zu ", find_tree_height_bin(binTree->root, 0));
 }
 
-
-void test_stack() {
-    struct Stack *stack = create_stack(2);
-
-    // example elements
-    int i = 10;
-    int j = 43;
-    int k = 56;
-
-    // push 2 elements -> no resize
-    uint8_t error = push(stack, &i);
-    printf("Error: %u\n", error);
-
-    error = push(stack, &j);
-    printf("Error: %u\n", error);
-
-    // push the third element -> resize to 4
-    push(stack, &k);
-
-    // retreiving 3 elements back
-    for (size_t u = 0; u < 3; u++) {
-        T *elem = malloc_elem((T)rand());
-        error = pop(stack, &elem);
-        printf("elem %zu:" T_FORMAT " with error code %u\n", u, *elem, error);
-    }
-
-    srand(time(NULL));
-    // fill stack with lots of heap allocated random numbers
-    for (size_t u = 0; u < 10000; u++) {
-        int *elem = (int*)malloc(sizeof(int));
-        *elem = rand();
-
-        push(stack, elem);
-    }
-
-    // get the random numbers back
-    for (size_t u = 0; u < 10000; u++) {
-        int *elem;
-
-        error = pop(stack, &elem);
-        printf("elem %zu: %d with error code %u\n", u, *elem, error);
-    }
-
-    // pop empty stack
-    int *elem;
-    error = pop(stack, &elem);
-    printf("(nil) == %p, error: %d\n", elem, error);
-
-    // free the data structure
-    free_stack(stack);
-}
-
-int main()
+void benchmark(size_t number_of_keys)
 {
-    for (size_t i = 0; i < 10; i++) {
-        size_t number_of_keys = (i + 1) * 10000;
+    int *keys = (int*)malloc(sizeof(int) * number_of_keys);
+    int *searches = (int*)malloc(sizeof(int) * number_of_keys);
 
-        int *keys = (int*)malloc(sizeof(int) * number_of_keys);
-        int *searches = (int*)malloc(sizeof(int) * number_of_keys);
+    gen_rand_data(keys, searches, number_of_keys);
 
-        gen_rand_data(keys, searches, number_of_keys);
+    test_rbtree(keys, searches, number_of_keys);
+    test_bin_tree(keys, searches, number_of_keys);
 
-        test_rbtree(keys, searches, number_of_keys);
-        printf(" ");
-        test_bin_tree(keys, searches, number_of_keys);
+    free(keys);
+    free(searches);
 
-        free(keys);
-        free(searches);
+}
+
+int main(int argc, char** argv)
+{   
+    if (argc < 2) exit(EXIT_FAILURE);
+    
+    srand(time(NULL));
+
+    long number_of_keys = atol(argv[1]);
+    if (number_of_keys < 0) {
+        printf("ERROR: number of keys was %s parsed to %ld!", argv[1], number_of_keys);
+        exit(EXIT_FAILURE);
     }
+
+    benchmark(number_of_keys);
     return 0;
 }

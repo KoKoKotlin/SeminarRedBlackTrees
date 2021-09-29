@@ -2,6 +2,7 @@
 *.out
 *.o
 log*
+*.csv
 
 main.aux
 main.bbl
