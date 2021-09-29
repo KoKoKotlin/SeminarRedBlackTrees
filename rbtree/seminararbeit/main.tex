@@ -5,6 +5,11 @@
 \usepackage{acronym}
 \usepackage{listings}
 \usepackage[margin=2cm]{geometry}
+\usepackage{endnotes}
+
+% for pseudocode
+\usepackage{algorithm}
+\usepackage[noend]{algpseudocode}
 
 % change language to german
 \usepackage[utf8]{inputenc}
@@ -63,6 +68,10 @@
 % usesul macros
 \newcommand{\lstin}[1]{\lstinline[language=C]{#1}}
 \newcommand{\cpl}{\textbf{C}$\;$}
+
+% for footnotes
+\renewcommand{\notesname}{Fußnoten}
+\let\footnote=\endnote
 
 % ------- glossary -------
 % to build the glossary when changed run the build make_glossaries.cmd file first
@@ -148,10 +157,49 @@
 \newglossaryentry{rec}
 {
   name={Rekursion},
-  description={Überbegriff für Programme oder Funktionen, die sich selbst aufrufen oder durch sich selbst definiert sind. \cite[S. 52]{aic} (z.B. $n! := n * (n - 1)! \wedge 0! := 1 \forall n \in \mathbb{N}$ )},
+  description={Überbegriff für Programme oder Funktionen, die sich selbst aufrufen oder durch sich selbst definiert sind. \cite[S. 52]{aic} (z.B. \[
+n! := 
+  \begin{cases}
+      n \cdot (n - 1)! ,& \text{wenn} \; n \neq 0\\
+      1,              & \text{wenn} \; n = 0
+  \end{cases}, \; n \in \mathbb{N}
+\]
+)},
   plural={Rekurionen}
 }
 
+\newglossaryentry{tv}
+{
+  name={Traversierung},
+  description={TODO},
+  plural={Traversierungen}
+}
+
+\newglossaryentry{psc}
+{
+  name={Pseudocode},
+  description={TODO},
+  plural={Pseudocodes}
+}
+
+\newglossaryentry{rcd}
+{
+  name={Rekursionstiefe},
+  description={TODO},
+}
+
+\newglossaryentry{arr}
+{
+  name={Array},
+  description={TODO},
+  plural={Arrays}
+}
+
+\newglossaryentry{wch}
+{
+  name={Worst-Case-Höhe},
+  description={TODO},
+}
 % ------- acronyms -------
 \newacronym{rbt}{RBT}{Red Black Tree}
 \newacronym{bt}{BT}{Binary Tree}
@@ -227,26 +275,233 @@ union RBTreeKey {
 
 Zusätzlich müsste man dazu noch angeben, welchen Datentyp man in seinem Code nutzt (z.B. mithilfe einer \gls{mc}). Dieser Ansatz ist allerdings sehr unflexibel, weil man auf die Datentypen, die im \lstin{union RBTreeKey} vom Programmierer festgelegt sind, beschränkt ist.
 
-Ein bessere Ansatz ist es, eine \gls{mc} zu definieren, die den Typen der Schlüssel definiert. Zusätzlich kann man noch eine 2. \gls{mc} definieren, die einen Vergleichsoperator bereitstellt.
-Das ermöglicht es beliebige Datentypen als Schlüssel zu verwenden (sogar \glspl{sts}), solange man die Vergleichsmacro definieren kann.
+Ein bessere Ansatz ist es, eine \gls{mc} zu definieren, die den Typen der Schlüssel definiert. Zusätzlich kann man noch eine 2. und 3. \gls{mc} definieren, die die Kleiner-Als- und Ist-Gleich-Operatoren definieren.
+Das ermöglicht es beliebige Datentypen als Schlüssel zu verwenden (sogar \glspl{sts}), solange man die Vergleichsmacros definieren kann.
 
 \begin{lstlisting}[language=C]
 #define T int
+#define TEQUAL(x, y) ((x) == (y))
 #define TLESS(x, y) ((x) < (y))
 \end{lstlisting}
 
-Genau diese Implementierung wurde auch gewählt. Im Usercode muss nur der Typ T und die Vergleichsoperation TLESS definiert werden. Einziger Nachteil ist, dass man im selben \gls{sc} nicht meherere verschidene Varianten von Schlüsseldatentypen nutzen kann.
+Genau diese Implementierung wurde auch gewählt. Im Usercode müssen nur der Typ T und die Vergleichsoperationen TLESS und TEQUAL definiert werden. Einziger Nachteil ist, dass man im selben \gls{sc} nicht meherere verschidene Varianten von Schlüsseldatentypen nutzen kann.
+
+\subsection{Knoten als Struct}
+Wie schon in Kapitel \ref{def} beschrieben, sind Bäume nichts anders als ein 3-Tupel $(l, k, r)$. 
+$l$ und $r$ sind die Unterbäume und $k$ ist die Wurzel des Baumes (hier als $k$ bezeichnet wegen Schlüssel $\widehat{=}$ Key). 
+Jeder Knoten enthält somit seinen Schlüssel und eine Referenz auf den linken und rechten Unterbaum.
+In \cpl wird der Baum nun als verkettete Liste von Knoten dargestellt
+\footnote{Theoretisch gibt es auch eine Möglichkeit die Baumstruktur als \gls{arr} von Knoten darzustellen und bessere Cacheladezeiten zu bekommen. 
+Das größte Problem beim der Implementierung als verkettete Datenstruktur ist, dass die einzelnen Knoten stark verstreut im Heap abgespeichert sind und somit es zu vielen Cache Misses kommt. Diese Streuung kommt durch die Implementierung von \lstin{malloc} in der \cpl-Standart-Bibliothek zu stande ("The order and contiguity of storage allocated by successive calls to malloc() is unspecified." \cite{IEEEmalloc}). Das verlangsamt das Programm. 
+Man könnte als Array Implementierung eine spezielle Möglichkeit nutzen, Indizes für das Strukturieren des Arrays in Parent und Child zu nutzen. 
+Die Root würde den Index 0 erhalten. Die linken und rechten Kinder dann jeweils den Index $2 \cdot n + 1$ und $2 \cdot n + 2$ ($n$ ist der Index des Parents). So erhält jeder Knoten einen eindeutigen Index und es gibt eine eindeutige Parent-Child-Beziehung. 
+Leider ist der Red-Black-Tree kein vollständig balancierter Binary Tree, sodass es im Worst Case (Kapitel \ref{time}) passieren kann, dass sehr viel Speicher verschwendet wird, weil sehr viele Stellen im Array unbesetzt bleiben. Deswegen habe ich mich dagegen entschieden und habe die verkettete Variante der Datenstruktur implementiert.
+}.
+Im \lstin{struct Node} haben wir somit den generischen Schlüssel \lstin{T *key} und zugehörigen Wert \lstin{void *value}.
+Zusätzlich speichern wir Pointer zum linken und rechten Child, welche die Wurzeln der entsprechenden Unterbäume sind. Zusätzlich wird auch noch ein Pointer zum Parent gespiechert, 
+da man diesen ziemlich oft in den Algorithmen zum Einfügen und Löschen von Knoten benötogt und man so den Quellcode etwas vereinfachen kann.
+
+Natürlich gibt es im Knoten auch noch ein Feld, welches die Farbe des Knotens speichert. Diese ist später wichtig, weil sie von zum balancieren des Baumes benötigt wird. 
+Dieses findet während des Einfügens und Löschens neuer Knoten in den Baum statt. Die Werte für dieses Feld im \gls{sts} werden durch die \glspl{mc} \lstin{RB_TREE_RED} und \lstin{RB_TREE_BLACK} definiert.
+
+Zusätzlich existiert ein weiter \gls{sts} für den Baum selbst, welcher allerdings nur als Handle für die Funktionen dient. Er speichert die Wurzel 
+und die Anzahl der eingefügten Knoten. Diese wird benötigt, damit man die \gls{wch} des Baums berechnen kann
+\footnote{Die Worst-Case-Höhe wird für eine kleine Optimierung benötigt. Im Kapitel \ref{tr} wird beschrieben, wie man die Bäume traversiert. 
+Das ist normalerweise eine rekursive Operation, die ich jedoch iterativ implementiert habe. Dafür werden \glspl{st} benötigt, die sich dynamisch vergrößern, falls sie überlaufen würden.
+Ich habe diese Stacks jedoch so implementiert, dass man sie mit einer initialen Größe erstellen kann. Die Worst-Case-Höhe des Baums gibt nun ungefähr die größte \gls{rcd} an, welche bei mir der größten Anzahl an Elementen auf dem Stack entspricht.
+Somit kann ich dem Stack von Anfang an schon genug Platz geben, sodass er sich nicht so oft vergrößern muss, was mit einem Aufruf von \lstin{reallocarray()} verbunden. 
+Dabei wird ein großer Speicherbereich kopiert, was das Programm unnötig verlangsamt, wenn man zu oft mehr Speicher im Stack benötigt.    
+}.
+
+\begin{lstlisting}[language=C]
+#define RB_TREE_RED     1U
+#define RB_TREE_BLACK   0U
+
+struct Node;
+
+struct Node {
+    void *value;
+
+    T *key;
+
+    struct Node *left;
+    struct Node *right;
+    struct Node *parent;
+
+    uint8_t color;
+};
+
+struct RBTree {
+    struct Node *root;
+
+    size_t node_count;
+};
+\end{lstlisting}
+
+Zusätzlich existieren 2 Helfer-Funktionen, die jeweils eine Instanz von diesem \gls{sts} für den Nutzer erstellen und auch wieder freigeben. Der Baum wird durch die \lstin{create_tree} Funktion auf dem Heap abgespeichert und aus wird lediglich ein Pointer zu ihr ausgegeben. 
+Das Löschen des Baumes wird durch \lstin{free_tree} implementiert. Dieses ist auch auf keinen Fall trivial, weil es Bottom-Up durchgeführt werden muss und somit nicht durch den Nutzer selbst implementiert werden sollte. 
+
+Die Signatur dieser Funktionen sieht man im unteren Listing.
+
+\begin{lstlisting}[language=C]
+struct RBTree* create_tree();  
+void free_tree(struct RBTree *rbtree);
+\end{lstlisting}
 
 \subsection{Suche nach Knoten}
-Eine der wichtigsten Operation, auf die auch später das Suchen und das Löschen von Knoten auf aufbaut ist die Suche im Baum. Diese ist normalerweise als Rekursiver Algorithmus definiert, lässt sich aber auch ziemlich einfach iterativ implementieren.
-Grundsätzlich wurde in der Implementierung auf Rekursion versichtet und immer entweder ein iterativer Ansatz verwendet oder ein selbst implementierter \gls{st}, um \glspl{sof} zu vermeiden und die zustätzlich Laufzeit 
-und die zusätzlichen Laufzeitkosten, die Rekursion mit sich bringt, zu umgehen.  fff
+Eine der wichtigsten Operation, auf die auch später das Einfügen und das Löschen von Knoten aufbaut ist die Suche im Baum. Diese ist normalerweise als rekursiver Algorithmus definiert, lässt sich aber auch ziemlich einfach iterativ implementieren.
+Grundsätzlich wurde in der Implementierung auf \gls{rec} verzichtet und immer entweder ein iterativer Ansatz verwendet oder ein selbst implementierter \gls{st}, um \glspl{sof} zu vermeiden.
+
+Die Funktion, die die Suche implementiert, akzeptiert eine Pointer zum Baum, den zu suchenden Schlüssel und einen Pointer, in der der Pointer des gefundenen Knotens geschrieben werden kann, falls vorhanden. 
+
+\begin{lstlisting}[language=C]
+uint8_t search_node(struct RBTree* rbtree, T* key, struct Node** node);
+\end{lstlisting}
+
+Der Algorithmus selbst speichert den aktuellen Knoten in der Variable \lstin{struct Node* current} beginnend bei der Wurzel. Anschließen wird iterativ entweder der linke oder der rechte Unterbaum besucht, abhängig davon, ob der Schlüssel, nachdem gesucht wird, kleiner oder größer als der Schlüssel des aktuellen Knotens ist.
+Wenn er kleiner ist wird der linke Unterbaum besucht sonst der Rechte. Dies geschiet, in dem \lstin{current} entweder das linke oder rechte Child des aktuellen Knotens zugewisen wird.
+
+Die \lstin{while}-Schleife bricht ab, wenn der Schlüssel gefunden wurde oder das nächste Child \lstin{NULL} ist. Im letzteren Fall wird ein Fehlercode returned und dem Ausgabe Pointer \lstin{NULL} zugewiesen, weil der Schlüssel nicht im Baum vorhanden ist. 
+Ansonsten kann man der Ausgabe einfach \lstin{current} zuweisen und den Erfolgswert returnen, der anzeigt, dass es keinen Fehler gab (mehr dazu in Kapitel \ref{err}). 
+
+\begin{lstlisting}[language=C]
+struct Node *current  = rbtree->root;
+
+while (current != NULL) {
+    if (TEQUAL(*(current->key), *(key))) break;
+    current = (TLESS(*key, *(current->key))) ? current->left : current->right;
+}
+
+if (current == NULL) {
+    *node = NULL;
+    return RB_TREE_KEY_ERROR;
+}
+
+*node = current;
+return RB_TREE_SUCCESS;
+\end{lstlisting}
 
 \subsection{Einfügen von Knoten}
+Eine weiter wichtige Operation ist das Einfügen von Daten in den Baum. Dabei müssen die zwei Eigenschaften der Datenstruktur erhalten bleiben, die sortierte Reihenfolge und dass der Baum ein valider \gls{rbt} ist.
+Das Listing unten zeigt die Signatur der Funktion, die das Einfügen durchführt. Sie akzeptiert einen Pointer zu einem Baumstruct \lstin{struct RBTree* rbtree}, einen Pointer zum Schlüssel des neuen Knotens \lstin{T* key} und optional Daten, die auch im Knoten gespeichert werden sollen, \lstin{void* value} (dieser Wert kann auch \lstin{NULL} sein). 
+
+\begin{lstlisting}[language=C]
+uint8_t insert_node(struct RBTree* rbtree, T* key, void* value);
+\end{lstlisting}
+
+Die Implementierung sorgt erst dafür, dass der neue Knoten an die richtige Stelle im Baum eingefügt wird und stellt danach (wenn nötig) sicher, dass es immer noch ein valider \gls{rbt} ist.
+
+
 
 \subsection{Löschen von Knoten}
 
-\subsection{Generische Baumtraversierung}
+\pagebreak
+\subsection{Generische Baumtraversierung} \label{tr}
+Wie schon in der Einleitung erwähnt, bieten \glspl{bt} die Möglichkeit, Daten geordnet zu speichern. Nun benötigt man auch Möglichkeiten, auf die Daten in einer bestimmten Reihenfolge zuzugreifen. Grundsätzlich gibt es 3 Optionen, die man als \gls{tv} bezeichnet nämlich Inorder-, Preorder- und Postorder-Traversierung.
+Alle diese Algorithmen sind rekursiv definiert. \cite[S. 44ff]{aic}  Der untere \gls{psc} stellt dar, wie sie funktionieren. 
+
+\begin{algorithm}
+  \caption{Traversierungs-Algorithmen}
+  \begin{algorithmic}[1]  
+  \Procedure{Preorder}{nodeptr, VISIT}
+    \If {noteptr == NULL}
+      \Return
+    \EndIf
+    \State VISIT(noteptr)
+    \State PREORDER(noteptr$\rightarrow$left)
+    \State PREORDER(noteptr$\rightarrow$right)
+  \EndProcedure
+  \Procedure{Inorder}{nodeptr, VISIT}
+    \If {noteptr == NULL}
+      \Return
+    \EndIf
+    \State INORDER(noteptr$\rightarrow$left)
+    \State VISIT(noteptr)
+    \State INORDER(noteptr$\rightarrow$right)
+  \EndProcedure
+  \Procedure{Postorder}{nodeptr, VISIT}
+    \If {noteptr == NULL}
+      \Return
+    \EndIf
+    \State POSTORDER(noteptr$\rightarrow$left)
+    \State POSTORDER(noteptr$\rightarrow$right)
+    \State VISIT(noteptr)  
+  \EndProcedure
+  \end{algorithmic}
+\end{algorithm}
+\cite[S. 318ff]{aop}
+
+Dabei ist \lstin{noteptr} der Pointer der Wurzel des Unterbaums (der ganze Baum ist auch ein Unterbaum von sich selbst). Und \lstin{VISIT} stellt dabei eine Funktionspointer dar, der einen \lstin{noteptr} als Parameter akzeptiert und ebenfalls als Argument in die Traversierungsfunktionen gegeben wird.
+So ist es dem Nutzer möglich, eine bestimmte Funktion auf alle Knoten anzuwenden. 
+
+\begin{lstlisting}[language=C]
+uint8_t inorder_traversel(struct RBTree *rbtree, void (*visit)(struct Node*))
+{
+    struct Node *current = rbtree->root;
+    struct Stack *stack = create_stack(_calc_worst_case_height(rbtree));
+
+    while (current != NULL || !is_stack_empty(stack)) {
+        if (current != NULL) {
+            push(stack, current);
+            current = current->left;
+        } else {
+            struct Node *stack_node;
+            pop(stack, &stack_node);
+            visit(stack_node);
+            current = stack_node->right;
+        }
+    }
+    free_stack(stack);
+    return RB_TREE_SUCCESS;
+}
+\end{lstlisting}
+
+Im oberen Listing kann man am Beispiel der Inorder-Traversierung erkennen, wie die Algorithmen iterativ implementiert wurden. Anstatt den Hardware-\gls{st} zu verwenden, wurde ein Software-\gls{st} \lstin{struct Stack *stack} implementiert. 
+In diesen werden jeweils die noch zu besuchenden Unterbäume gepushed, und wenn der aktuelle Knoten \lstin{current} \lstin{NULL} ist, wird ein neuer Knoten aus dem \gls{st} geholt.
+Diese Vorgehen simuliert das verhalten einer rekusiven Funktion, jedoch besteht bei sehr großer \gls{rcd} nicht die Möglichkeit eines \gls{sof}. Die anderen Traversierungsarten wurden auf die selbe Weise implementiert.
+
+Es kommt auf die genutzte Traversierungsart an, in welcher Reihenfolge man die Knoten besucht. Wenn man Inorder nutzt, dann bekommt man sie nach Schlüsseln aufsteigend sortiert. Das kann man z.B. dafür nutzen, die Schlüssel in geordneter Reihenfolge auszugeben.
+Bei der Postorder Traversierung wird die Wurzel des Unterbaums als besucht. So kann man Bottom-Up-Algorithmen implementieren, die bei den Blättern beginnen und die Wurzel des Baums als letztes behandeln.
+
+Ein sehr praktischen Bespiel dafür ist das Freigeben der \glspl{rbt}. Dabei müssen zuerst die Unterbäume aus dem \gls{hp} gelöscht werden und danach die Wurzel, weil man sonst die Unterbäume zwischenspeichern müsste, da die Pointer zu ihnen in der Wurzel gespeichert sind.
+Wenn man diese aber nun als erster freigibt, würde man keinen Zugriff mehr auf ihre Unterbäume haben.
+
+\begin{lstlisting}[language=C]
+void _free_node(struct Node *node)
+{
+    if (node->key != NULL) free(node->key);
+    if (node->value != NULL) free(node->value);
+    free(node);
+}
+
+void free_tree(struct RBTree *rbtree)
+{
+    postorder_traversel(rbtree, &_free_node);
+    free(rbtree);
+} 
+\end{lstlisting}
+
+Hier wurde die \lstin{VISIT}-Funktion als \lstin{_free_node} implementiert, welche den Schlüssel und den Wert des besuchten Knotens freigibt und dann den Knoten-\gls{sts} selbst.
+
+\subsection{Fehlerbehandlung} \label{err}
+Wie man in vielen vorhergenden Listings bereits sehen konnte, haben die meisten Funktionen als Ausgabetypen \lstin{uint8_t}. (Die Fehlerbehandlung wurde aus den Listings jedoch meistens weggelassen, damit die sie nicht zu lang werden.)
+Das liegt, dass die Funktionen über den Ausgabewert Fehler an den Nutzer zurückgeben. Diese Fehler wurden als \gls{mc} definiert und durch sie können verschiedene Arten unterschieden werden.
+
+\begin{lstlisting}[language=C]
+#define RB_TREE_SUCCESS             0U
+#define RB_TREE_OUT_OF_MEM          1U
+#define RB_TREE_KEY_ERROR           2U
+#define RB_TREE_NULL_ERROR          3U
+#define RB_TREE_DUPLICATE_KEY_ERROR 4U  
+\end{lstlisting}
+
+In meiner Implementierung repräsentiert die 0 immer, dass es keinen Fehler gab. 
+\lstin{RB_TREE_OUT_OF_MEM} wird von Funktionen verwendet, die dynamisch Speicher allozieren und das Betriebssystem nicht mehr genug zur Verfügung stellt. 
+Die einzige Funktion, die den Fehler nutzt, ist \lstin{insert_node}, nämlich genau dann, wenn kein neuer Knoten erstellt werden kann. 
+Hierbei wird der Fehler allerdings nicht ausgegeben, sondern das Program wird mit \lstin{exit(RB_TREE_OUT_OF_MEM)} beendet. 
+Ein \lstin{RB_TREE_KEY_ERROR} wird von \lstin{search_node} ausgegeben, wenn der zu suchende Schlüssel im Baum nicht existiert.
+Funktionen, die Pointer als Argumente akzeptieren, geben einen \lstin{RB_TREE_NULL_ERROR} Fehler aus, wenn mindestens einer dieser Pointer \lstin{NULL} ist.
+Und ein \lstin{RB_TREE_DUPLICATE_KEY_ERROR} wird ausgegeben, wenn man \lstin{insert_node} einen Schlüssel übergibt, der bereits im Baum existiert und man doppelte Schlüssel und implizites Überschreiben mithilfe der \lstin{RB_TREE_DUPLICATE_KEYS} \gls{mc} deaktiviert hat.
 
 \pagebreak
 
@@ -256,11 +511,18 @@ und die zusätzlichen Laufzeitkosten, die Rekursion mit sich bringt, zu umgehen.
 \section{Benchmarks}
 \pagebreak
 
-\section{Speicher- und Zeitkomplexität}
+\section{Speicher- und Zeitkomplexität} \label{time}
 \pagebreak
 
 \section{Verwendung}
 \pagebreak
+
+\begingroup
+\parindent 0pt
+\parskip 2ex
+\def\enotesize{\normalsize}
+\theendnotes
+\endgroup 
 
 \bibliographystyle{alpha}
 \bibliography{references} % see references.bib for bibliography management
@@ -285,4 +547,8 @@ und die zusätzlichen Laufzeitkosten, die Rekursion mit sich bringt, zu umgehen.
 %                 return EXIT_SUCCESS;
 %         }
 % \end{lstlisting}
-        
+
+% TODO: 
+% Definitions
+% Reference for Stackoverflow recursion depth in defs and traversal
+% Pictures for tree and for tree array represantation

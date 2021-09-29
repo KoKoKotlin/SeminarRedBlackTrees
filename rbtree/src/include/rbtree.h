@@ -60,7 +60,7 @@ struct RBTree {
 struct RBTree* create_tree();
 struct Node* _create_node(T* key, void* value);
 
-void free_tree(struct RBTree*);
+void free_tree(struct RBTree *rbtree);
 
 uint8_t insert_node(struct RBTree* rbtree, T* key, void* value);
 uint8_t delete_node(struct RBTree* rbtree, T* key);
