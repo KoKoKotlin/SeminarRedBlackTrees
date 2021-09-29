@@ -70,8 +70,8 @@ uint8_t search_node(struct RBTree* rbtree, T* key, struct Node** node);
 uint8_t override_value(struct RBTree* rbtree, T* key, void* value);
 #endif
 
-uint8_t preorder_traversel(struct RBTree* rbtree,  void (*action)(struct Node*));
-uint8_t postorder_traversel(struct RBTree* rbtree, void (*action)(struct Node*));
-uint8_t inorder_traversel(struct RBTree* rbtree,   void (*action)(struct Node*));
+uint8_t preorder_traversel(struct RBTree* rbtree,  void (*visit)(struct Node*));
+uint8_t postorder_traversel(struct RBTree* rbtree, void (*visit)(struct Node*));
+uint8_t inorder_traversel(struct RBTree* rbtree,   void (*visit)(struct Node*));
 
 #endif  // RBTREE_INCLUDE_RBTREE_POINTER_H_

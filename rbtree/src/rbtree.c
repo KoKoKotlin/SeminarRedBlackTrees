@@ -496,7 +496,7 @@ size_t _calc_worst_case_height(struct RBTree *rbtree)
     return (size_t)(2 * log2((double)rbtree->node_count) + 2);
 }
 
-uint8_t preorder_traversel(struct RBTree *rbtree, void (*action)(struct Node*))
+uint8_t preorder_traversel(struct RBTree *rbtree, void (*visit)(struct Node*))
 {
     // root - left - right
 
@@ -515,7 +515,7 @@ uint8_t preorder_traversel(struct RBTree *rbtree, void (*action)(struct Node*))
 
     while (!is_stack_empty(stack)) {
         pop(stack, &current);
-        action(current);
+        visit(current);
 
         if (current->right != NULL)
             push(stack, current->right);
@@ -529,7 +529,7 @@ uint8_t preorder_traversel(struct RBTree *rbtree, void (*action)(struct Node*))
     return RB_TREE_SUCCESS;
 }
 
-uint8_t postorder_traversel(struct RBTree *rbtree, void (*action)(struct Node*))
+uint8_t postorder_traversel(struct RBTree *rbtree, void (*visit)(struct Node*))
 {
     // left - right - root
     if (rbtree == NULL) {
@@ -556,7 +556,7 @@ uint8_t postorder_traversel(struct RBTree *rbtree, void (*action)(struct Node*))
             if (stack_node->right != NULL && last != stack_node->right) {
                 current = stack_node->right;
             } else {
-                action(stack_node);
+                visit(stack_node);
                 pop(stack, &last);
             }
         }
@@ -567,7 +567,7 @@ uint8_t postorder_traversel(struct RBTree *rbtree, void (*action)(struct Node*))
     return RB_TREE_SUCCESS;
 }
 
-uint8_t inorder_traversel(struct RBTree *rbtree, void (*action)(struct Node*))
+uint8_t inorder_traversel(struct RBTree *rbtree, void (*visit)(struct Node*))
 {
     // left - root - right
 
@@ -590,7 +590,7 @@ uint8_t inorder_traversel(struct RBTree *rbtree, void (*action)(struct Node*))
         } else {
             struct Node *stack_node;
             pop(stack, &stack_node);
-            action(stack_node);
+            visit(stack_node);
             current = stack_node->right;
         }
     }
