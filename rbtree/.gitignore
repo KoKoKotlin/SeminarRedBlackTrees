@@ -3,6 +3,7 @@
 *.o
 log*
 *.csv
+*.ent
 
 main.aux
 main.bbl

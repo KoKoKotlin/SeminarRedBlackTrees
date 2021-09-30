@@ -208,7 +208,7 @@ n! :=
 % ------- glossary -------
 
 \title{\textbf{Seminararbeit Red-Black Trees}}
-\author{Yannik Höll}
+\author{Herr Yannik Höll}
 \date{\today}
 
 \begin{document}
@@ -243,6 +243,9 @@ Dazu wurden jeweils beide \glspl{dt} in der Programmiersprache \cpl implementier
 Zudem werden die Ergenisse von \gls{bm} analysiert, welche zeigen sollen, dass \glspl{rbt} tatsächlich besser Laufzeiteigenschaften haben als
 die Standimplementierung der \glspl{bt}.
 Außerdem wird auf die Speicher- und Zeitkomplexität der beiden \glspl{dt} eingegangen und wie sich vorallem der \gls{rbt} im \gls{wc} verhält. 
+
+% TODO: Code Disclaimer shortned versions
+
 \pagebreak
 
 \section{Definition Binary Tree \& Red Black Tree} \label{def}
@@ -382,6 +385,8 @@ return RB_TREE_SUCCESS;
 \end{lstlisting}
 
 \subsection{Einfügen von Knoten}
+
+\subsubsection{Einfügen des neuen Knotens}
 Eine weiter wichtige Operation ist das Einfügen von Daten in den Baum. Dabei müssen die zwei Eigenschaften der Datenstruktur erhalten bleiben, die sortierte Reihenfolge und dass der Baum ein valider \gls{rbt} ist.
 Das Listing unten zeigt die Signatur der Funktion, die das Einfügen durchführt. Sie akzeptiert einen Pointer zu einem Baumstruct \lstin{struct RBTree* rbtree}, einen Pointer zum Schlüssel des neuen Knotens \lstin{T* key} und optional Daten, die auch im Knoten gespeichert werden sollen, \lstin{void* value} (dieser Wert kann auch \lstin{NULL} sein). 
 
@@ -390,6 +395,54 @@ uint8_t insert_node(struct RBTree* rbtree, T* key, void* value);
 \end{lstlisting}
 
 Die Implementierung sorgt erst dafür, dass der neue Knoten an die richtige Stelle im Baum eingefügt wird und stellt danach (wenn nötig) sicher, dass es immer noch ein valider \gls{rbt} ist.
+
+Das Einfügen des Knotens in den Baum kann nun analog zur Suche implementiert werden. 
+Der Unterschied liegt darin, dass man den Baum durchsucht, bis man bei \lstin{NULL} ankommt.
+Beim Suchen war das der Fehlerfall, dass es keinen Knoten mit dem zu suchenden Schlüssel gab, aber während des Einfügens ist das die Annahme die getroffen wird. 
+Der Schlüssel, den den Nutzer neu hinzufügen will, sollte noch nicht im Baum enthalten sein. Damit ist der erreichte \lstin{NULL}-Pointer nach der Logik des Baums genau die Stelle, an der der neue Knoten mit dem neuen Schlüssel eingefügt werden muss.
+
+Der Grund, warum hier der Pointer zum Vorgänger-Knoten \lstin{previous} zusätzlich gespeichert werden muss, ist, 
+dass \lstin{NULL} nicht auf eine valide Structinstanz zeigt, sondern lediglich anzeigt, dass es keinen Knoten an dieser Stelle gibt. 
+Somit kann man auch nicht den Parent von \lstin{NULL} abfragen und man muss diese Information in einer zustätzlichen Variable zwischenspeichern. 
+
+\begin{lstlisting}[language=C]
+struct Node *previous = NULL;
+struct Node *current  = rbtree->root;
+
+while (current != NULL) {
+    previous = current;
+    current  = (TLESS(*key, *(previous->key))) ? previous->left : previous->right;
+}
+\end{lstlisting}
+
+Nun wird eine neue Instanz von \lstin{struct Node} erstellt. Das erledigt die Helfer-Funktion \lstin{_create_node}, welche den neuen Knoten auf dem Heap abspeichert und den Pointer auf ihn ausgibt. 
+In ihr wird auch direkt sichergestellt, dass der neu allozierte \gls{hp}-Speicher korrekt initialisiert wird und die Farbe auf rot gesetzt.
+Der neue Knoten muss dann an den Parent vom erreichten \lstin{NULL}-Pointer entweder links oder rechts angehangen werden.
+
+\begin{lstlisting}[language=C]
+struct Node *new_node = _create_node(key, value);
+if (TLESS(*key, *(previous->key))) {
+    previous->left = new_node;
+} else {
+    previous->right = new_node;
+}
+new_node->parent = previous;
+\end{lstlisting}
+
+Es gibt auch noch den Spezialfall, dass ein Knoten in einen noch leeren \gls{rbt} eingefügt werden soll. 
+Hier muss dann der Pointer auf die Wurzel im \lstin{struct RBTree} gesetzt werden. Deswegen wird bevor der oben angebene Algorithmus ausgeführt wird, noch überprüft, 
+ob der Nutzer den leeren Baum als Eingabe in die Funktion gegeben hat. 
+Das Gute ist, dass man in diesem Fall auch gar nicht den Baum durchsuchen muss, sondern sofort weiß, dass der neue Knoten die Wurzel selbst ist.
+Es darf allerdings nicht vergessen werden, dass durch \lstin{_create_node} die Farbe des neuen Knotens auf rot gesetzt wurde. Sie muss deswegen noch zu schwarz geändert werden, 
+weil die Wurzel des \gls{rbt} immer schwarz sein muss. 
+\begin{lstlisting}[language=C]
+if (rbtree->root == NULL) {
+  rbtree->root = new_node;
+  rbtree->root->color = RB_TREE_BLACK;
+}
+\end{lstlisting}
+
+\subsubsection{Balancieren des Baums}
 
 
 
