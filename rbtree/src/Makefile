@@ -1,7 +1,7 @@
 SHELL = /bin/sh
 CC = gcc
 LIBS = -lm
-FLAGS = -Wall -Wextra
+FLAGS = -Wall -Wextra -Iinclude/
 
 OBJECTS = main.o stack.o visualize.o binary.o 
 TARGET = rbtree.out
