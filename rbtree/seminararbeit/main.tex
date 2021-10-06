@@ -443,8 +443,36 @@ if (rbtree->root == NULL) {
 \end{lstlisting}
 
 \subsubsection{Balancieren des Baums}
+Nach dem Einfügen in den Baum, kann es dazu kommen, dass die Regeln des \glspl{rbt} verletzt werden.
+Dieser Fall tritt dann ein, wenn der Parent des neuen Knotens rot ist, denn dann sind 2 aufeinanderfolgende rote Knoten im Baum, was nicht der Fall sein darf (siehe \ref{def}).
+
+Wenn der obige Fall eintritt, muss einer der in Kapitel \ref{def} beschriebenen Algorithmen ausgeführt werden, damit der Baum wieder alle Eigenschaften erfüllt und ein valider \gls{rbt} wird.
+Das hat den Nebeneffekt, dass der Baum dabei besser im Durchschnitt ausbalanciert wird. 
+In der Implementierung wurden Helferfunktionen implementiert, die den Colorflip und die Rotations am Baum durchführen.
+
+Das untere Listing zeigt einen Auszug aus der Funktion, welche die Baumrotation durchführt (nur die Linksrotation).
+
+\begin{lstlisting}[language=C]
+struct Node *child = start_node->right;
+if (start_node == rbtree->root) rbtree->root = child;
+child->parent = start_node->parent;
+
+if (start_node->parent != NULL) {
+  if (start_node->parent->left == start_node) start_node->parent->left = child;
+  else start_node->parent->right = child;
+}
+
+start_node->right = child->left;
+if (start_node->right) start_node->right->parent = start_node;
+
+child->left = start_node;
+start_node->parent = child; 
+\end{lstlisting}
+
+Hier zeigt sich der Vorteil der Implementierung als Verkettung von Pointern. Die Rotation kann einfach durch das Austauschen von Child- und Parent-Pointern.
 
 
+\pagebreak
 
 \subsection{Löschen von Knoten}
 

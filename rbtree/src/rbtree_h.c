@@ -1,9 +1,9 @@
 #include <stdlib.h>
 #include <math.h>
 
-#include "include/log.h"
-#include "include/stack.h"
-#include "include/rbtree.h"
+#include "log.h"
+#include "stack.h"
+#include "rbtree.h"
 
 uint8_t get_direction(struct Node *start_node)
 {
@@ -453,9 +453,16 @@ uint8_t delete_node(struct RBTree* rbtree, T* key)
 
 struct Node* _search_node(struct Node* current, T* key)
 {
-    if (current == NULL || TEQUAL(current->key, key)) return current;
-    else if(TLESS(current->key, key)) return _search_node(current->left, key);
-    else return _search_node(current->right, key);
+    if (current == NULL || TEQUAL(*current->key, *key))  {
+        debug_printf("Recursive search finished with %p.", current);
+        return current;
+    } else if(TLESS(*key, *current->key)) {
+        debug_printf("Recursive search now advances to left subtree: " T_FORMAT " < " T_FORMAT ".", *key, *current->key);
+        return _search_node(current->left, key);
+    } else {
+        debug_printf("Recursive search now advances to right subtree: " T_FORMAT " > " T_FORMAT ".", *key, *current->key);
+        return _search_node(current->right, key);
+    }
 }
 
 uint8_t search_node(struct RBTree* rbtree, T* key, struct Node** node) 

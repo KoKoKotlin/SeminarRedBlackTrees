@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "include/stack.h"
-#include "include/log.h"
+#include "stack.h"
+#include "log.h"
 
 struct Stack* create_stack(size_t initial_capacity)
 {

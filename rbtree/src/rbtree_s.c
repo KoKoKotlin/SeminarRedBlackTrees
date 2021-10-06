@@ -1,9 +1,9 @@
 #include <stdlib.h>
 #include <math.h>
 
-#include "include/log.h"
-#include "include/stack.h"
-#include "include/rbtree.h"
+#include "log.h"
+#include "stack.h"
+#include "rbtree.h"
 
 uint8_t get_direction(struct Node *start_node)
 {

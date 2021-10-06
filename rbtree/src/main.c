@@ -1,10 +1,10 @@
 #include <time.h>
 
-#include "include/log.h"
-#include "include/rbtree.h"
-#include "include/stack.h"
-#include "include/visualize.h"
-#include "include/binary.h"
+#include "log.h"
+#include "rbtree.h"
+#include "stack.h"
+#include "visualize.h"
+#include "binary.h"
 
 // benchmark output format: CSV insert_rb, search_rb, delete_rb, height_rb, insert_bin, search_bin, delete_bin, height_bin
 

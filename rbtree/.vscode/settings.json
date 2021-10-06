@@ -11,6 +11,8 @@
         "tuple": "c",
         "type_traits": "c",
         "utility": "c",
-        "visualize.h": "c"
+        "visualize.h": "c",
+        "stdio.h": "c",
+        "log.h": "c"
     }
 }
