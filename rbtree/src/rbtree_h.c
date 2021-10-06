@@ -492,47 +492,6 @@ uint8_t search_node(struct RBTree* rbtree, T* key, struct Node** node)
     return RB_TREE_SUCCESS;
 }
 
-/*
-uint8_t search_node(struct RBTree* rbtree, T* key, struct Node **node)
-{
-    if (rbtree == NULL) {
-        debug_print("Given tree was null! Aborting...");
-        return RB_TREE_NULL_ERROR;
-    }
-
-    if (key == NULL) {
-        debug_print("Given search key was null! Aborting...");
-        return RB_TREE_NULL_ERROR;
-    }
-
-    struct Node *current  = rbtree->root;
-
-    #ifdef DEBUG
-        size_t count = 0;
-    #endif
-
-    while (current != NULL) {
-        #ifdef DEBUG
-            count++;
-        #endif
-
-        if (TEQUAL(*(current->key), *(key))) break;
-        current = (TLESS(*key, *(current->key))) ? current->left : current->right;
-    }
-
-    if (current == NULL) {
-        debug_print("Key not found!");
-
-        *node = NULL;
-        return RB_TREE_KEY_ERROR;
-    }
-
-    debug_printf("Found node for key " T_FORMAT " and had to check %zu nodes.", *key, count);
-    *node = current;
-
-    return RB_TREE_SUCCESS;
-}
-*/
 void _preorder_traversel(struct Node *current, void (*action)(struct Node*))
 {
     // root - left - right
