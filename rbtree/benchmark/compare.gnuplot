@@ -4,6 +4,8 @@ set datafile separator ','
 
 set xlabel "number of nodes"
 set ylabel "time in ns"
+set format x "%.1sE%T"
+set xtics font ", 16"
 
 l = 3
 
@@ -23,6 +25,5 @@ plot "b1.csv" using 1:2 title "insert_{rb} non rec" with lines lw l, "b2.csv" us
 plot "b1.csv" using 1:3 title "search_{rb} non rec" with lines lw l, "b2.csv" using 1:3 title "search_{rb} rec" with lines lw l
 
 plot "b1.csv" using 1:4 title "delete_{rb} non rec" with lines lw l, "b2.csv" using 1:4 title "delete_{rb} rec" with lines lw l
-
 
 unset multiplot
