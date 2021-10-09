@@ -469,8 +469,66 @@ child->left = start_node;
 start_node->parent = child; 
 \end{lstlisting}
 
-Hier zeigt sich der Vorteil der Implementierung als Verkettung von Pointern. Die Rotation kann einfach durch das Austauschen von Child- und Parent-Pointern.
+Hier zeigt sich der Vorteil der Implementierung als Verkettung von Pointern. Die Rotation kann einfach durch das Austauschen von Child- und Parent-Pointern implementiert werden.
 
+Nachdem die Helferfunktionen besprochen wurden, kann nun endlich mit dem rebalancieren begonnen werden, welches diese nutzt.
+Die Funktion, die diesen entsprechenden Algorithmus dafür implementiert heißt \lstin{fix_tree_insert}. Ihre Signatur befindet sich im unteren Listing.
+
+\begin{lstlisting}[language=C]
+void fix_tree_insert(struct Node *start_node, struct RBTree *rbtree)
+\end{lstlisting}
+
+\lstin{start_node} ist dabei der Knoten, der die Eigenschaften eines \gls{rbt} verletzt, also der Knoten, der zuletzt eingefügt wurde.
+
+Unten kann man nun die Implementierung der Funktion sehen.
+Als erstes werden 2 Pointer angelegt, die den aktuell betrachteten Knoten und seinen Parent speichern.
+Das ist wichtig, weil es passieren kann, dass der Algorithmus mehrere Schritte benötigt.
+Das ist auch der Grund, warum sich alles innerhalb einer \lstin{while}-Schleife befindet, nämlich damit solange rebalanciert wird,
+bis die Abbruchbediengung erreicht wird (siehe Kapitel \ref{def}).
+
+Wie schon in Kapitel \ref{def} beschrieben, gibt es verschiedene Fälle, die betrachtet werden müssen.
+Je nach Farbe des Uncle-Knotens und Richtung des Parents werden Colorflips und Rotationen durchgeführt.
+Dafür können hier nun die Helferfunktionen, die in den letzten Abschnitten beschrieben wurden genutzt werden.
+Der Vorteil daran ist, dass diese auch gleich noch bestimmte Fehlerfälle abfangen, sodass man sich viel Codeduplzierung ersparen kann.
+
+Als letztes wird noch die Farbe der Wurzel auf \lstin{RB_TREE_BLACK} gesetzt, weil es vorkommen kann,
+dass sie am Ende rot ist. Die Eigenschaften von \gls{rbt} schreiben jedoch vor, dass die Wurzel immer schwarz sein muss.
+Hier wurde bewusst auf eine \lstin{if}-Abfrage verzichtet, um Instruktionen zu sparen.
+
+\begin{lstlisting}[language=C]
+struct Node *current = start_node;
+struct Node *parent = start_node->parent;
+
+while (parent != NULL && parent->color == RB_TREE_RED && current->color == RB_TREE_RED) {
+    if (parent->parent == NULL) break;
+
+    struct Node *uncle = get_uncle(current);
+
+    if (get_color(uncle) == RB_TREE_BLACK) {
+        if (get_direction(parent) != get_direction(current)) {
+            rotate(parent, get_direction(parent), rbtree);
+            current = parent;
+            parent = current->parent;
+        } else {
+            struct Node *grandparent = get_grandparent(current);
+            rotate(grandparent, !get_direction(parent), rbtree);
+            parent->color = RB_TREE_BLACK;
+            grandparent->color = RB_TREE_RED;
+            break;
+        }
+    } else if (get_color(uncle) == RB_TREE_RED) {
+        color_flip(current);
+        if (parent->parent == NULL) break;
+
+        struct Node *uncle = get_uncle(current);
+        current = get_grandparent(current);
+        parent = current->parent;
+    }
+}
+
+rbtree->root->color = RB_TREE_BLACK;
+
+\end{lstlisting}
 
 \pagebreak
 
