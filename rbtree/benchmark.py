@@ -62,9 +62,9 @@ def avg_data(batches: List[Batch]) -> Dict[int, List[float]]:
 
 def main():
     start = 100_000
-    stop  = 200_000
-    step  = 10_000
-    batch_size = 10
+    stop  = 2_000_000
+    step  = 50_000
+    batch_size = 15
 
     compile_version(VERSION.NON_REC)
     batches = []
