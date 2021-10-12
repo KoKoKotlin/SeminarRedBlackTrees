@@ -6,7 +6,10 @@
 \usepackage{listings}
 \usepackage[margin=2cm]{geometry}
 \usepackage{endnotes}
-
+\usepackage{tikz}
+\usepackage{blindtext}
+\usepackage{minipage-marginpar}
+\usepackage{wrapfig}
 % for pseudocode
 \usepackage{algorithm}
 \usepackage[noend]{algpseudocode}
@@ -26,26 +29,25 @@
 \definecolor{codepurple}{rgb}{0.58,0,0.82}
 \definecolor{backcolour}{rgb}{0.95,0.95,0.92}
 
-\lstdefinestyle{mystyle}{
-    backgroundcolor=\color{backcolour},
+\lstset{ 
+    language=C,
+    backgroundcolor=\color{backcolour},   
     commentstyle=\color{codegreen},
     keywordstyle=\color{magenta},
     numberstyle=\tiny\color{codegray},
     stringstyle=\color{codepurple},
     basicstyle=\ttfamily\footnotesize,
-    breakatwhitespace=false,
-    breaklines=true,
-    captionpos=b,
-    keepspaces=true,
-    numbers=left,
-    numbersep=5pt,
-    showspaces=false,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    keepspaces=true,                 
+    numbers=left,       
+    numbersep=5pt,                  
+    showspaces=false,                
     showstringspaces=false,
-    showtabs=false,
-    tabsize=2
-}
+    showtabs=false,                  
+    tabsize=2,           % show the filename of files included with \lstinputlisting; also try caption instead of title
+} 
 
-\lstset{style=mystyle}
 % ----------------------
 
 \usepackage{glossaries}
@@ -58,7 +60,7 @@
 \headsep 10pt
 \textheight 8.7in
 \textwidth 6.65in
-\linespread{1.2}
+\linespread{1}
 
 % for centering the title page
 \usepackage{titling}
@@ -246,10 +248,8 @@ Außerdem wird auf die Speicher- und Zeitkomplexität der beiden \glspl{dt} eing
 
 % TODO: Code Disclaimer shortned versions
 
-\pagebreak
 
 \section{Definition Binary Tree \& Red Black Tree} \label{def}
-\pagebreak
 
 \section{Implementierung}
 Wie schon in den vorhergenden Kapiteln beschrieben, handelt es sich bei den Bäumen um eine generische Datenstruktur, in die der Nutzer beliebig Daten mit einem bestimmten Schlüssel einfügen kann.
@@ -530,8 +530,6 @@ rbtree->root->color = RB_TREE_BLACK;
 
 \end{lstlisting}
 
-\pagebreak
-
 \subsection{Löschen von Knoten}
 
 Die letzte Operation, die die Daten im Baum verändert, ist das Löschen von Knoten.
@@ -688,7 +686,6 @@ while(1) {
 x->color = RB_TREE_BLACK;
 \end{lstlisting}
 
-\pagebreak
 \subsection{Generische Baumtraversierung} \label{tr}
 Wie schon in der Einleitung erwähnt, bieten \glspl{bt} die Möglichkeit, Daten geordnet zu speichern. Nun benötigt man auch Möglichkeiten, auf die Daten in einer bestimmten Reihenfolge zuzugreifen. Grundsätzlich gibt es 3 Optionen, die man als \gls{tv} bezeichnet nämlich Inorder-, Preorder- und Postorder-Traversierung.
 Alle diese Algorithmen sind rekursiv definiert. \cite[S. 44ff]{aic}  Der untere \gls{psc} stellt dar, wie sie funktionieren.
@@ -796,24 +793,76 @@ Ein \lstin{RB_TREE_KEY_ERROR} wird von \lstin{search_node} ausgegeben, wenn der 
 Funktionen, die Pointer als Argumente akzeptieren, geben einen \lstin{RB_TREE_NULL_ERROR} Fehler aus, wenn mindestens einer dieser Pointer \lstin{NULL} ist.
 Und ein \lstin{RB_TREE_DUPLICATE_KEY_ERROR} wird ausgegeben, wenn man \lstin{insert_node} einen Schlüssel übergibt, der bereits im Baum existiert und man doppelte Schlüssel und implizites Überschreiben mithilfe der \lstin{RB_TREE_DUPLICATE_KEYS} \gls{mc} deaktiviert hat.
 
-\pagebreak
-
 \section{Implementierungsvarianten}
-\pagebreak
 
+\pagebreak
 \section{Benchmarks}
 
-\begin{figure}[h]
-  \includegraphics{../benchmark/compare_insert.png}
+Nun da erklärt wurde, wie sich \glspl{rbt} von \glspl{bt} und berschrieben wurde, welche komplizierten Operationen durchgeführt werden müssen, damit der \gls{rbt} balanciert wird,
+stellt sich natürlich die Frage, ob dadurch wirklich eine bessere Laufzeit erzielt wird.
+In den folgenden 2 Abschnitten geht es darum, zu überprüfen, wie sich die Implementierung laufzeittechnisch verhält, wenn man eine große Anzahl an Knoten in die Datenstruktur einfügt.
+Es soll verglichen werden, ob die \gls{rbt} tatsächlich schneller sind als die \gls{bt} und ob meine Behauptung, dass Iterativ schneller als Rekursiv zumindest in diesem Fall stimmt. 
+
+\subsection{Durchführung}
+Für die Benchmarks wurde im \cpl-Code eine \lstin{main}-Funktion erstellt, die die Anzahl an Knoten, mit denen getestest werden soll als Kommandozeilenparameter erwartet.
+Anschließend werden zufällig zwei Arrays erstellt, die mit zufällig generierten Daten befüllt werden. Das erste enthält Daten, die in die Bäume eingefügt werden sollen und das zweite Daten, nach denen gesucht wird.
+
+Begonnen wird mit dem \gls{rbt}. Er wird zuerst mit den Daten befüllt, danach wird nach den Schlüsseln im zweiten Array gesucht. Dann wird seine Höhe bestimmt (welche ein sehr wichtiges Kriterium für die Laufzeit ist) und am Ende werden die Knoten alle wieder entfernt.  
+Die Zeit, die die Operationen brauchen, wird direkt im Code gemessen und dann in den \lstin{stdout} ausgegeben im CSV Format. Die selbe Prozedur wird anschließend auch noch für den \gls{bt} durchgeführt.
+Das testen mit verschiedenen Knotenanzahlen wurde durch ein Pythonscript automatisiert, welche das Programm kompieliert und dann mit verschiedenen Knotenanzahlen ausführt. 
+Begonnen wird dabei bei 100.000 Knoten und das wird in Schritten von 50.000 bis auf 2.000.000 erhöht. Damit zufällige Schwankungen ausgeschlossen werden, wird jeder Test mit einer bestimmten Anzahl 
+15 mal durchgeführt und am Ende wird der Durchschnitt der Messwerte gebildet. 
+
+\subsection{Red-Black-Tree vs. Binary Tree} \label{bbrbt}
+
+\begin{wrapfigure}{r}{200px}
+  \includegraphics[width=200px]{../benchmark/compare_bin.png}
+  \vspace{-20pt}
+  \caption{Vergleich Laufzeit \gls{rbt}/\gls{bt}}
+  \vspace{-15pt}
+\end{wrapfigure}
+
+Besonders wichtig ist es zu zeigen, dass unsere "Verbesserung" normalen Binary Trees tatsächlich performanter ist. In nebenstehender Abbildung kann man die Ergenisse des Benchmarks erkennen.
+Die Graphen, die mit dem Index $_{rb}$ beschriftet sind, sind die des \gls{rbt} und die anderen gehören zum \gls{bt}.
+Man kann erkenne, dass alle Operationen beim \gls{rbt} grundsätzlich schneller als die der Standardimplementierung sind. 
+Der Unterschied zwischen den beiden Datenstrukturen ist nicht konstant sondern nimmt mit steigender Anzahl an Knoten immer weiter zu. 
+
+Den Grund dafür kann man sehen, wenn man die Höhen der beiden Bäume vergleicht. Man kann sehen, dass sich der \gls{rbt} viel näher an der Höhe des vollständig balancierten Baumes befindet, 
+als der \gls{bt}. Das sorgt dafür, dass man beim \gls{rbt} im Durchschnitt nicht so viele Vergleiche benötigt, bis man den Knoten erreicht, den man sucht oder einen \lstin{NULL}-Pointer, bei dem 
+man einen neuen Knoten in den Baum einfügt. Das macht sich in den Benchmarks eindeutig bemerkbar.  
+
+% TODO: pic heights
+
+Eine weiter interessante Beobachtung ist, dass die Suche und die das Einfügen beim \gls{rbt} ungefähr gleich schnell sind, während das Löschen etwas langsamer als diese beiden Operationen ist.
+Einen so starken Unterschied gibt es beim \gls{bt} nicht. Meine Hypothese dafür ist, dass das Rebalancieren beim Löschen von Knoten sehr viel langsamer ist, als das Rebalancieren beim Einfügen, weil
+der Algorithmus häufig den ganzen Baum bis zur Wurzel durchgeht. 
+
+\subsection{Recursive vs. Iterativ}
+
+\begin{wrapfigure}{r}{200px}
+  \centering
+  \includegraphics[width=200px]{../benchmark/compare_insert.png}
   \caption{Vergleich Rekursive/Iterative Implementierungen}
-\end{figure}
-\pagebreak
+  \label{bir}
+\end{wrapfigure}
+
+Eine wichtige Frage, die sich während der Implementierung gestellt hat, ist, ob man die Operationen vom \gls{rbt} iterativ oder rekursiv implementiert. 
+\gls{rec} wäre zwar die erste Sache, an die man dabei denkt, weil die Defintion von Bäumen auch meistens rekursiv ist. Außerdem werden meistens auch alle Algorithmen rekursiv beschrieben. 
+Das Problem daran ist, dass durch sehr große Rekursionstiefe eventuell Leistungsprobleme entstehen können und teilweise auch sehr viel Speicher nötig ist. 
+Deswegen wurde, wie schon in vorhergenden Kapiteln beschrieben, eine iterative und eine rekursive Version der \gls{dt} erstellt, um diese zu vergleichen.
+Das Benchmark wurde wie in vorgehenden Abschnitt durchgeführt \ref{bbrbt} nur wurden hier die 2 verschiedenen Versionen der Programms getestet. 
+Dafür wurde das Pythonscript verändert, sodass es zuerst die iterative Variante kompiliert und die Tests durchführt und in eine Datei schreibt und anschließend die Rekursive. 
+
+Die Ergenisse sind in nachfolgenden Graphen in Abbildung \ref{bir} zu sehen. Es gibt jeweils einen Graph für die Suche, das Einfügen und das Löschen.
+
+Man kann in allen drei Fällen erkennen, dass die iterative Variante (non rec) ab einer sehr großen Anzahl von Knoten konsistent schneller ist als die Rekursive (rec).
+Meine Vermutung ist, dass es bei sehr großen Bäumen mit einer sehr großen Baumhöhe sehr viele Stackframes aufgebaut und auch wieder abgebaut werden müssen, wenn der rekursive Code ausgeführt wird.
+Bei meiner anderen Implementierung gibt es einen Softwarestack, welcher nur die nötigen Daten speichert und sich auch nicht vergrößern muss, weil er schon mit der richtigen Größe erstellt wird.
+Das könnte für den Signifikanten Unterschied in der Laufzeit der beiden Varianten führen.
 
 \section{Speicher- und Zeitkomplexität} \label{time}
-\pagebreak
 
 \section{Verwendung}
-\pagebreak
 
 \begingroup
 \parindent 0pt
@@ -824,6 +873,9 @@ Und ein \lstin{RB_TREE_DUPLICATE_KEY_ERROR} wird ausgegeben, wenn man \lstin{ins
 
 \bibliographystyle{alpha}
 \bibliography{references} % see references.bib for bibliography management
+
+
+
 
 \end{document}
 
@@ -850,3 +902,11 @@ Und ein \lstin{RB_TREE_DUPLICATE_KEY_ERROR} wird ausgegeben, wenn man \lstin{ins
 % Definitions
 % Reference for Stackoverflow recursion depth in defs and traversal
 % Pictures for tree and for tree array represantation
+
+
+%\begin{minipage}{.5\textwidth}
+%  \input{bild.tex}  
+%\end{minipage}
+%\begin{minipage}{.4\textwidth}
+%  \blindtext
+%\end{minipage}
