@@ -209,6 +209,8 @@ n! :=
 
 % ------- glossary -------
 
+\newtheorem{definition}{Definition}
+
 \title{\textbf{Seminararbeit Red-Black Trees}}
 \author{Herr Yannik Höll}
 \date{\today}
@@ -221,6 +223,9 @@ n! :=
 \pagebreak
 
 \tableofcontents
+\pagebreak
+
+\listoffigures
 \pagebreak
 
 \glsaddall
@@ -245,13 +250,103 @@ Dazu wurden jeweils beide \glspl{dt} in der Programmiersprache \cpl implementier
 Zudem werden die Ergenisse von \gls{bm} analysiert, welche zeigen sollen, dass \glspl{rbt} tatsächlich besser Laufzeiteigenschaften haben als
 die Standimplementierung der \glspl{bt}.
 Außerdem wird auf die Speicher- und Zeitkomplexität der beiden \glspl{dt} eingegangen und wie sich vorallem der \gls{rbt} im \gls{wc} verhält.
-
-% TODO: Code Disclaimer shortned versions
+Der Code, welcher hauptsächlich im Abschnitt \ref{impl} zu sehen sind, sind Auschnitte aus der echten Implementierung, 
+aus denen aufgrund von Platzgründen die gesamte Fehlerbehandlung entfernt wurde. Meistens handelt es sich nur um Ausschnitte. 
+Wenn der Leser den gesamten Quellcode sehen möchte, muss er in die Implementierung in \cpl schauen. 
 
 
 \section{Definition Binary Tree \& Red Black Tree} \label{def}
 
-\section{Implementierung}
+Bäume ganz allgemein sind anders als z.B. Arrays und Listen keine lineare Datenstrukturen, in denen alle Daten hintereinander liegen, sondern haben Verzweigungen, die durch bestimmte Eigenschaften in den Daten zu stande kommen.
+Eine formal mathematische Definition von Bäumen lautet wie folgt:
+
+\begin{definition}{Baum} \label{def_bin}
+  
+Ein Baum $T$ ist eine endliche Menge an Knoten mit folgenden Eigenschaften: 
+
+\begin{itemize}
+  \item Es gibt einen speziellen Knoten $k$, den man Wurzel nennt.
+  \item Alle anderen Knoten sind in $n \geq 0$ disjunkte Mengen $T_1, \cdots, T_n$ unterteilt, die selbst auch wieder Bäume sind und die man Unterbäume nennt. 
+\end{itemize}
+\end{definition}
+
+Durch diese Definition kann man direkt das Verhältnis zwischen der Wurzel und den anderen Knoten erkennen. Die Wurzel ist den anderen Knoten übergeordnet. 
+Zudem handelt es sich um eine rekursive Definition, weil wir den Baum mithilfe von sich selbst definiert wird.
+Das soll nochmal verdeutlichen, dass es sich grundlegend um eine rekursive Datenstruktur handelt. Alle Algorithmen, die man auf Bäume anwendet, können rekursiv definiert werden, was in den folgenden 
+Kapiteln verdeutlicht
+\cite[S. 308]{aop}
+
+\pagebreak
+
+\subsection{Binary Tree}
+
+\begin{wrapfigure}{r}{0pt}    
+    \begin{tikzpicture} [
+        inner sep = 0,
+        level 1/.style = { sibling distance = 3cm },
+        level 2/.style = { sibling distance = 1.5cm },
+        every node/.style={thick, draw, circle, minimum width = 1cm}
+        ]
+        
+        \node {10}
+        child [-latex] { node {1} 
+        child { node [red] {0} } 
+        child { node {5} } }
+        child [-latex] { node [blue] {15} 
+        child { node [green] {12} }
+        child { node [magenta] {20} } };
+    \end{tikzpicture}
+    \caption{Beispielhafte Abbildung eines Binärbaums}
+    \label{bin_ex}
+\end{wrapfigure}
+
+Der Binary Tree (engl. Binärbaum) ist eine spezielle Art von Baum, für den nach Definition \ref{def_bin} einfach $n \leq 2$ gelten muss. D.h. für jeden Knoten im Baum gibt es maximal 2 Unterbäume.
+Man kann diesen Baum jetzt als 3-Tupel $(l, k, r)$, wobei $l$ und $r$ den linken bzw. rechten Unterbaum darstellen und k die Wurzel. Ich spreche hier über sortierte Binary Trees bzw. Binary Search Trees, werde diese aber absofort trotzdem einfach als Binary Tree bezeichnen.
+Eine entscheidene Eigenschaft ist, dass alle Knoten, die sich in $l$ befinden kleienr als die Wurzel $k$ sind und alle Knoten in $r$ größer.
+Das ist auch der Grund, warum man von geordneten Bäumen spricht. 
+
+\subsubsection{Nomenklatur spezieller Knoten}
+
+In Abbildung \ref{bin_ex} ist ein Beispiel eines Binary Trees zu sehen. Nun bekommen bestimmte Knoten in diesen Bäumen spezielle Namen, damit man einfach über sich sprechen kann, ohne immer
+eine konkrete Lagebeschreibung machen zu müssen. In diesem Baum ist der Knoten mit der Nummer 10 die Wurzel.
+Wenn wir die Pfeile von der 10 aus entlang gehen gelangen wir zu den Knoten 1 und 15. Diese werden als Children (engl. Kinder) von 10 bezeichnet. Genauso sind 0 und 5 die Childer von 1 uind 12 und 20 die Children von 15.
+Umgekehrt bezeichnet man 10 als Parent (engl. Elternteil) von 1 und 15. 
+Die Knoten 0, 5, 12 und 20 sind die Leaves (engl. Blätter) des Baums. Das sind genau die Knoten, die keine Children haben.
+Grundsätzlich ist es so, dass jeder Knoten im Baum einen Parent hat außer die Wurzel.
+Alle Knoten, die den gleichen Parent haben, bezeichnet man als Siblings (engl. Geschwister). In unserem Beispiel sind 0 und 5, 12 und 20 und 1 und 15 Siblings. 
+Der Parent eines Parent ist der Grandparent (engl. Großelternteil). Also ist beispielsweise die 10 der Grandparent von der 0.
+\cite[S.311]{aop}
+
+Da die folgeneden Benennungen nun ein bisschen komplizierter werden, kommen nun die Farben zum Einsatz. Von der 0 ausgehend ist der Sibling des Parents (blau) der Uncle (engl. Onkel) der 0. Das wäre also hier die 15.
+Und die Childer vom Uncle werden als Niece (engl. Nichte) (grün, die 12) und Nephew (engl. Neffe) (magenta, die 20) bezeichnet. Die Niece ist immer der Knoten, der in die selbe Richtung zeigt, wie der Knoten auf dem man sich bezieht und der Nephew somit, der, der in die entgegengesetzte Richtung zeigt.
+Diese Unterscheidung wird später in einem Algorithmus wichtig werden.
+
+\subsubsection{Weiter Definitionen}
+Man bezeichnet einen Knoten als \textbf{Leaf}, wenn er keine Children besitzt.
+
+Als \textbf{Pfad} in einem Baum bezeichnet man eine Folge von Knoten, die bei der Wurzel beginnt und bei einem Leaf endet. 
+
+\subsubsection{Algorithmen}
+
+
+\subsection{Red Black Tree}
+
+Grundsätzlich hat der Red Black Tree auch alle Eigenschaften eines normalen Binary Trees. Jedoch erhält jeder Knoten eine zusätzlich Eigenschaft, die üblicherweise als Farbe bezeichnet wird.
+Dabei kann ein Knoten rot oder schwarz sein.
+
+Nun werden zusätzlich Regeln eingeführt, die ein Baum erfüllen muss, damit er ein Red Black Tree ist.
+
+\begin{itemize}
+  \item[1.] Die Wurzel ist immer schwarz.
+  \item[2.] Die Children eines roten Knotens sind schwarz.
+  \item[3.] Jeder Pfad hat die selbe Anzahl an schwarzen Knoten. 
+\end{itemize}
+
+Die 2. Regel ist äquivalent zur Aussage, dass nicht 2 rote Knoten aufeinander folgen dürfen. 
+
+\subsubsection{Erweiterung der Algorithmen}
+
+\section{Implementierung} \label{impl}
 Wie schon in den vorhergenden Kapiteln beschrieben, handelt es sich bei den Bäumen um eine generische Datenstruktur, in die der Nutzer beliebig Daten mit einem bestimmten Schlüssel einfügen kann.
 
 Die Implementierung stellt deswegen 3 Funktionen bereit, mit denen man nach einem bestimmten Schlüssel im Baum suchen kann, man einen neuen Schlüssel zusammen mit einem Datensatz einfügen kann und man einen Schlüssel und den Datensatz wieder aus dem Baum löschen kann.
@@ -661,9 +756,8 @@ Das untere Listing zeigt die gesamte Implementierung der Funktion.
 while(1) {
     if (x->parent == NULL) {
         break;
-    } else if (get_color(x) == RB_TREE_RED) {
-        break;
-    } else if (get_color(get_sibling(x)) == RB_TREE_RED) {
+    } else if (get_color(x) == RB_TREE_RED) { break; } 
+      else if (get_color(get_sibling(x)) == RB_TREE_RED) {
         x->parent->color = RB_TREE_RED;
         get_sibling(x)->color = RB_TREE_BLACK;
         rotate(x->parent, get_direction(x), rbtree);
@@ -682,9 +776,9 @@ while(1) {
         x = x->parent;
     }
 }
-
 x->color = RB_TREE_BLACK;
 \end{lstlisting}
+\cite{YTDelete}
 
 \subsection{Generische Baumtraversierung} \label{tr}
 Wie schon in der Einleitung erwähnt, bieten \glspl{bt} die Möglichkeit, Daten geordnet zu speichern. Nun benötigt man auch Möglichkeiten, auf die Daten in einer bestimmten Reihenfolge zuzugreifen. Grundsätzlich gibt es 3 Optionen, die man als \gls{tv} bezeichnet nämlich Inorder-, Preorder- und Postorder-Traversierung.
@@ -831,7 +925,11 @@ Den Grund dafür kann man sehen, wenn man die Höhen der beiden Bäume vergleich
 als der \gls{bt}. Das sorgt dafür, dass man beim \gls{rbt} im Durchschnitt nicht so viele Vergleiche benötigt, bis man den Knoten erreicht, den man sucht oder einen \lstin{NULL}-Pointer, bei dem 
 man einen neuen Knoten in den Baum einfügt. Das macht sich in den Benchmarks eindeutig bemerkbar.  
 
-% TODO: pic heights
+\begin{figure}
+  \centering
+  \includegraphics[width=400px]{../benchmark/compare_height.png}
+  \caption{Vergleich der Höhen}
+\end{figure}
 
 Eine weiter interessante Beobachtung ist, dass die Suche und die das Einfügen beim \gls{rbt} ungefähr gleich schnell sind, während das Löschen etwas langsamer als diese beiden Operationen ist.
 Einen so starken Unterschied gibt es beim \gls{bt} nicht. Meine Hypothese dafür ist, dass das Rebalancieren beim Löschen von Knoten sehr viel langsamer ist, als das Rebalancieren beim Einfügen, weil

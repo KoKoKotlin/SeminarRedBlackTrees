@@ -3,12 +3,12 @@
         inner sep = 0,
         level 1/.style = { sibling distance = 3cm },
         level 2/.style = { sibling distance = 1.5cm },
-        every node/.style={draw, circle, minimum width = 1cm}
+        every node/.style={thick, draw, circle, minimum width = 1cm}
         ]
         
         \node {0}
-        child [red, ->] { node [red, thick] {1} 
-        child [blue] { node {3} } 
+        child [->] { node {1} 
+        child { node {3} } 
         child { node {5} } }
         child { node {200} 
         child { node {4} }
