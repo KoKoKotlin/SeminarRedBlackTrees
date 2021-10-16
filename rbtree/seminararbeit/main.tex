@@ -6,7 +6,12 @@
 \usepackage{listings}
 \usepackage[margin=2cm]{geometry}
 \usepackage{endnotes}
+
 \usepackage{tikz}
+\usepackage{pgfplots}
+\pgfplotsset{compat=newest}
+\usetikzlibrary{shapes.geometric,arrows,fit,matrix,positioning}
+
 \usepackage{blindtext}
 \usepackage{minipage-marginpar}
 \usepackage{wrapfig}
@@ -49,6 +54,15 @@
 } 
 
 % ----------------------
+
+% Define block styles
+\tikzstyle{decision} = [diamond, draw, fill=blue!20, 
+    text width=4.5em, text badly centered, node distance=3cm, inner sep=0pt]
+\tikzstyle{block} = [rectangle, draw, fill=blue!20, 
+    text width=5em, text centered, rounded corners, minimum height=4em]
+\tikzstyle{line} = [draw, -latex']
+\tikzstyle{cloud} = [draw, ellipse,fill=red!20, node distance=3cm,
+    minimum height=2em]
 
 \usepackage{glossaries}
 
@@ -239,7 +253,7 @@ n! :=
 % Motivation der Datenstruktur
 Eine Möglichkeit Daten so geordnet zu speichern sind so genannte Baumdatenstrukturen. Diese Speichern Werte geordnet nach einem bestimmten Schlüssel.
 Eine sehr einfache Baumimplemntierung ist der \gls{bt} welcher jeweils nur 2 Abzweigungen pro Knoten besitzt (rigorose Baumdefinition in Kapitel \ref{def}).
-Leider hat diese naiive Variante der Datenstruktur einige Probleme, welche vorallem beim Einfügen der Daten in geordneter Reigenfolge entstehen.
+Leider hat diese naive Variante der Datenstruktur einige Probleme, welche vorallem beim Einfügen der Daten in geordneter Reigenfolge entstehen.
 Um diese Probleme zu umgehen kann man die Algorithmen zum Einfügen und Entfernen neuer Datensätze so anpassen, dass die Baumstruktur performanter wird.
 Ein möglicher besserer Ansatz sind die \glspl{rbt}.
 
@@ -303,7 +317,7 @@ Kapiteln verdeutlicht
 Der Binary Tree (engl. Binärbaum) ist eine spezielle Art von Baum, für den nach Definition \ref{def_bin} einfach $n \leq 2$ gelten muss. D.h. für jeden Knoten im Baum gibt es maximal 2 Unterbäume.
 Man kann diesen Baum jetzt als 3-Tupel $(l, k, r)$, wobei $l$ und $r$ den linken bzw. rechten Unterbaum darstellen und k die Wurzel. Ich spreche hier über sortierte Binary Trees bzw. Binary Search Trees, werde diese aber absofort trotzdem einfach als Binary Tree bezeichnen.
 Eine entscheidene Eigenschaft ist, dass alle Knoten, die sich in $l$ befinden kleienr als die Wurzel $k$ sind und alle Knoten in $r$ größer.
-Das ist auch der Grund, warum man von geordneten Bäumen spricht. 
+Das ist auch der Grund, warum man von geordneten Bäumen spricht. \cite[S. 147]{aad}
 
 \subsubsection{Nomenklatur spezieller Knoten}
 
@@ -322,30 +336,349 @@ Und die Childer vom Uncle werden als Niece (engl. Nichte) (grün, die 12) und Ne
 Diese Unterscheidung wird später in einem Algorithmus wichtig werden.
 
 \subsubsection{Weiter Definitionen}
-Man bezeichnet einen Knoten als \textbf{Leaf}, wenn er keine Children besitzt.
+Man bezeichnet einen Knoten als \textbf{Leaf} (engl. Blatt), wenn er keine Children besitzt. \cite[S. 36]{aic}
+Dementsprechend bezeichnet man einen Knoten als \lstin{Halfleaf} (engl. Halbblatt), wenn er nur ein Child hat. 
 
-Als \textbf{Pfad} in einem Baum bezeichnet man eine Folge von Knoten, die bei der Wurzel beginnt und bei einem Leaf endet. 
+Als \textbf{Path} (engl. Pfad) in einem Baum bezeichnet man eine Folge von Knoten, die paarweise verschieden sind und 2 Knoten im Baum (oder allgemein in einem Graphen) verbinden. \cite[S. 36]{aic}
 
 \subsubsection{Algorithmen}
 
+Die \textbf{Suche} in \gls{bt} ist direkt durch ihre Eigenschaften zu definieren. 
+Da alle Knoten in linken Unterbaum kleiner sind und alle Knoten rechts größer kann man einfach rekursiv eine Suche wie folgt definieren:
+
+\begin{algorithm}
+  \caption{Suche im \gls{bt}}
+  \begin{algorithmic}[1]
+  \Procedure{Search}{$node$, $key$}
+    \If {$node == NULL$}
+      
+      \Return $NULL$
+    \EndIf
+    \If {$node \rightarrow key == key$}
+      
+      \Return $node$
+    \ElsIf {$node \rightarrow key < key$}
+      
+      \Return $Search(node \rightarrow left, key)$
+    \Else
+      
+      \Return $Search(node \rightarrow right, key)$
+    \EndIf
+  \EndProcedure
+  \end{algorithmic}
+\end{algorithm}
+
+\lstin{node} ist ein Pointer auf einen Knoten im Baum, \lstin{key} ist der zu suchende Schlüssel.
+\lstin{node}$\rightarrow$\lstin{right} und \lstin{node}$\rightarrow$\lstin{left} 
+sind jeweils Pointer zum rechten und linken Unterbaum. t
+
+Letzendlich funktioniert der Algorithmus so, dass man bei der Wurzel beginnt. 
+Als erstes überprüft man, ob man bei einem NULL Pointer angekommen ist, was bei mir der Sentinel-Wert für einen leeren Knoten ist. 
+Das zeigt an, dass der Schlüssel im Baum nicht vorhanden ist, und es wird direkt NULL ausgegeben.
+Dann wird abgefragt, ob der aktuelle Knoten \lstin{node} bereits den richtigen Schlüssel hat. Wenn das der Fall ist, dann wird er ausgegeben.
+Ansonsten wird die Suche beim linken bzw. rechten Unterbaum fortgesetzt, je nachdem ob \lstin{key} kleiner oder größer als \lstin{node}$\rightarrow$\lstin{key} ist.
+Das wird durch einen rekursiven Aufruf der \lstin{Search}-Funktion realisiert. 
+\cite[S. 203]{aic}
+
+Das \textbf{Einfügen} ist im Grunde das selbe wie die Suche, nur das man sucht, bis man \lstin{NULL} erreicht. 
+An dieser Stelle wird dann der neue Knoten eingefügt. Da man keinen Pointer auf den Parent hat, muss man diesen jeweils zwischenspeichern.
+\cite[S. 205]{aic}
+Da der Algorithmus fast genauso wie die Suche definiert ist, wird hier auf Pseudocode verzichtet. 
+
+Die letzte wichtige Operation das \textbf{Löschen} von Knoten. Diese ist wohl die komplizierteste, weil der naive Ansatz, einfach den Knoten zu entfernen, nicht funktioniert.
+Die einzigen Knoten, die man Entfernen kann, ohne dass der Baum in 2 Teile zerfällt, sind die Leafs.
+Um den Knoten, der gelöscht werden soll, zu finden, kann man die vorhin definierte Suche verwenden.
+Deswegen muss man diesen Knoten, mit einem Leaf austauschen. Dabei muss aber die Inorder-Traversierungsreihenfolge erhalten bleiben (Def. siehe Kapitel \ref{tr}).
+Diese hat dann den nächstkleineren bzw. -größeren Schlüssel.
+Nach dem Austausch ist der zu löschende Knoten ein Leaf oder Halfleaf und kann sicher entfernt werden. 
+Im Falle eines Halfleafs muss dann noch das Kind des entfernten Knotens als Kind des entsprechenden Parents festgelegt werden.
+
+\begin{algorithm}
+  \caption{Löschen im \gls{bt}}
+  \begin{algorithmic}[1]
+  \Procedure{Preorder}{root, key}
+    \State $node \gets Search(root, key)$
+
+    \If {$node == NULL$}
+      
+      \Return
+    \EndIf
+
+    \State $node \gets SwapToLeaf(node)$
+
+    \If {$IsHalfLeaf(node)$}
+      \State $SetChild(GetParent(node), GetChild(node))$
+    \EndIf
+    \State $Delete(node)$  
+    \EndProcedure
+  \end{algorithmic}
+\end{algorithm}
+\cite[S. 210f]{aic}
+
+Genaue Implementierungen der hier im Pseudocode nicht gezeigten Funktionen ($IsHalfLeaf$, $GetParent$, $GetChild$, $SetChild$) werden dann im Kapitel \ref{impl} genauer besprochen.
+
+Als letztes wird hier noch ein Algorithmus besprochen, der zwar mithilfe des algemeinem \gls{bt} definiert werden kann, aber erst in den Algorithmen des \gls{rbt} seine Anwendung findet. 
+Die Rede ist von den \textbf{Baumrotationen}, die die Struktur des Baumes direkt verändern, ohne die Inorder-Reihenfolg durcheinander zu bringen.
+Hier gibt es zwei Möglichkeiten, eine Rotation nach links bzw. nach rechts.
+
+\begin{figure}[h]
+\centering
+
+\begin{minipage}[t]{.45\linewidth}
+\centering
+\begin{tikzpicture} [
+    remember picture,
+    inner sep = 0,
+    level 1/.style = { sibling distance = 3cm },
+    level 2/.style = { sibling distance = 1.5cm },
+    every node/.style={thick, draw, circle, minimum width = 1cm}
+    ]
+
+    \node {C}
+    child [-latex] { node {A} child { node[draw=none,fill=none] {$\gamma$} } child { node[draw=none,fill=none] {$\alpha$} } } 
+    child [-latex] { node[draw=none,fill=none] (E) {$\beta$} };
+\end{tikzpicture}
+\end{minipage}
+\hfill
+\begin{minipage}[t]{.45\linewidth}
+\centering
+\begin{tikzpicture} [
+  remember picture,
+  inner sep = 0,
+  level 1/.style = { sibling distance = 3cm },
+  level 2/.style = { sibling distance = 1.5cm },
+  every node/.style={thick, draw, circle, minimum width = 1cm}
+  ]
+
+  \node {A}
+  child [-latex] { node[draw=none,fill=none] (B) {$\gamma$} } 
+  child [-latex] { node {C} child { node[draw=none,fill=none] {$\alpha$} } child { node[draw=none,fill=none] {$\beta$} } };
+\end{tikzpicture}
+\end{minipage}
+
+\tikz[remember picture,overlay]
+  \draw[->,very thick] (E) to[bend left] node[above] {$\text{links Rot.}$} (B);
+
+\tikz[remember picture,overlay]
+  \draw[->,very thick] (B) to[bend left] node[below] {$\text{rechts Rot.}$} (E);
+
+\caption{Baumrotationen Beispiel}
+\label{trot}
+
+\end{figure}
+
+In der Abbildung \ref{trot} kann man diese Algorithmen angewandt auf einen Unterbaum sehen. $\alpha$, $\beta$ und $\gamma$ sind in diesem Fall beliebige Unterbäume oder könnten auch leer sein.
+Man kann erkennen, dass durch den Algorithmus die Inorder-Reihenfolge erhalten bleibt. Die beiden Operationen sind Inversen der jeweils anderen.
+Außerdem wird ein Knoten eine Ebene im Baum nach oben verschoben und dessen Parent um eine nach unten.
+Ein Unterbaum wechselt die Parents.
+\cite[S. 313]{ita}
 
 \subsection{Red Black Tree}
+
+\begin{wrapfigure}{r}{90px}
+  \centering
+  \begin{tikzpicture} [
+    inner sep = 0,
+    level 1/.style = { sibling distance = 3cm },
+    level 2/.style = { sibling distance = 1.5cm },
+    every node/.style={thick, draw, circle, minimum width = 1cm}
+    ]
+    
+    \node {0}
+    child [-latex] { node {1} child { node {2} child { node {3} child { node {4} } } } };
+
+    \end{tikzpicture}
+\caption{Worst Case \gls{bt}}
+\vspace{-50pt}
+\end{wrapfigure}
+
+Die Motivation für \glspl{rbt} ist der \gls{wc} von den \glspl{bt}. 
+Wenn man hintereinander einfach geordnet Elemente in diese einfügt, dann wird immer eins der beiden Children besetzt je nach Ordnung der Daten.
+Das führt zu einer Datenstruktur, die eher einer linearen Liste gleicht und deswegen schlechtere Zeitkomplexität besitzt.
 
 Grundsätzlich hat der Red Black Tree auch alle Eigenschaften eines normalen Binary Trees. Jedoch erhält jeder Knoten eine zusätzlich Eigenschaft, die üblicherweise als Farbe bezeichnet wird.
 Dabei kann ein Knoten rot oder schwarz sein.
 
 Nun werden zusätzlich Regeln eingeführt, die ein Baum erfüllen muss, damit er ein Red Black Tree ist.
 
+\begin{definition}{Eigenschaft \gls{rbt}}
+  
 \begin{itemize}
   \item[1.] Die Wurzel ist immer schwarz.
   \item[2.] Die Children eines roten Knotens sind schwarz.
-  \item[3.] Jeder Pfad hat die selbe Anzahl an schwarzen Knoten. 
+  \item[3.] Jeder Path zwischen der Wurzel und einem Leaf hat die selbe Anzahl an schwarzen Knoten. 
 \end{itemize}
 
-Die 2. Regel ist äquivalent zur Aussage, dass nicht 2 rote Knoten aufeinander folgen dürfen. 
+\end{definition}
+
+Die 2. Regel ist äquivalent zur Aussage, dass nicht 2 rote Knoten aufeinander folgen dürfen. \cite[S. 220f]{aic} 
+
+\begin{figure}[h]
+\begin{minipage}[t]{.45\linewidth}
+  \centering
+  \begin{tikzpicture} [
+      inner sep = 0,
+      level 1/.style = { sibling distance = 3cm },
+      level 2/.style = { sibling distance = 1.5cm },
+      every node/.style={thick, draw, circle, minimum width = 1cm}
+      ]
+  
+      \node [black] {10}
+      child [-latex] { node {5} child { node[red] {1} } child { node[red] {3} } } 
+      child [-latex] { node {20} child { node[red] {12} } child { node[red] {24} } };
+  \end{tikzpicture}
+  \caption{Valider \gls{rbt}}
+  \end{minipage}
+  \hfill
+  \begin{minipage}[t]{.45\linewidth}
+  \centering
+  \begin{tikzpicture} [
+    inner sep = 0,
+    level 1/.style = { sibling distance = 3cm },
+    level 2/.style = { sibling distance = 1.5cm },
+    every node/.style={thick, draw, circle, minimum width = 1cm}
+    ]
+  
+    \node [black] {10}
+    child [-latex] { node[red] {5} child { node[red] {1} } child { node[red] {3} } } 
+    child [-latex] { node {20} child { node[red] {12} } child { node[red] {24} } };
+  \end{tikzpicture}
+  \caption{Kein \gls{rbt}; Erfüllt Eigenschaft 2 und 3 nicht}
+  \end{minipage}
+  
+  \caption{Beispiel \gls{rbt}}
+\end{figure}
+  
+
+Das Balancieren funktioniert im Grunde so, dass man nachdem man Knoten in den Baum eingefügt hat 
+bzw. aus dem Baum entfernt hat nur dafür sorgen muss, dass diese 3 Regeln wieder erfüllt werden. 
+Dafür muss man die Algorithmen des normalen \gls{bt} um einen Teil erweitern, der überprüft, 
+ob irgendeine der Eigenschaften nicht erfüllt ist und dann Knoten umfärben und Baumrotationen durchführen, bis das wieder für alle 3 der Fall ist. 
 
 \subsubsection{Erweiterung der Algorithmen}
 
+Die \textbf{Suche} im Baum muss nicht verändert werden, da die Eigenschaften keinen Einfluss auf sie haben. \cite[S. 221]{aic}
+
+\textbf{Colorflip} ist ein zusätzlicher Algorithmus, der dann beim Balancieren gebraucht wird.
+Er ändert einfach die Farben bestimmter Knoten von rot nach schwarz bzw. umgekehrt.
+
+\begin{wrapfigure}{l}{0pt}
+  \centering
+  \includegraphics[width=250px]{prog1.png}
+  \caption{Programmablaufplan Einfügen}
+\end{wrapfigure}
+
+Beim \textbf{Einfügen} ist die erste Neuerung, dass die neuen Knoten immer rot sind. 
+Also kann nur Eigenschaft zwei invalidiert werden, nach dem dieser Algorithmus durchgeführt wurde. 
+Das passiert genau dann, wenn der Parent des eingefügten Knotens rot war. Man erweitert den Standardalgorithmus nun um eine weitere Funktion, 
+die diesen Fall überprüft und dann nach bestimmten Kriterien Rotationen und Colorflips durchführt, bis der Baum wieder ein valider \gls{rbt} ist.
+
+Der Algorithmus wird iterativ auf den Baum angewandet, solange, bis der Parent des aktuellen Knotens nicht rot ist. 
+Begonnen wird beim neu eingefügten Knoten. Der \textbf{1. Fall} tritt ein, wenn der Uncle des behandleten Knotens rot ist. 
+Dann wird einfach ein Colorflip ausgeführt und man setzt den Algorithmus beim Grandparent fort.
+Im \textbf{2. Fall} ist der Uncle schwarz und der aktuelle Knoten in die selbe Richtung zeigt, wie der Parent. 
+Dann wird eine Rotation ausgeführt in die Richtung, in die der Parent zeigt, als Linksrotation wenn es nach links zeigt und ansonsten eine Rechtsrotation.
+Das schöne hier ist nun, dass dieser zweite Fall direkt zum \textbf{3. Fall} führt.
+Er kann jedoch auch erreicht werden, wenn der Parent und der aktuelle Knoten in unterschiedliche Richtungen zeigen. Dann wird in die Richtung des Parents um den Grandparent rotiert, der Parent schwart und der Grandparent rot gefärbt und der Algorithmus wird beendet.
+So braucht man maximal 2 Rotationen oder $h/2$ Colorflips ($h$ ist die Länge des längsten Pfades von der Wurzel zu einem Leaf oder wird auch Höhe des Baums genannt).
+
+\begin{wrapfigure}{l}{0pt}
+  \centering
+  \includegraphics[width=300px]{prog2.png}
+  \caption{Programmablaufplan Löschen}
+  \label{del-tr}
+\end{wrapfigure}
+
+Der letzten Algorithmus, der angepasst werden muss, ist das \textbf{Löschen} von Knoten im Baum. Es muss wieder einen Algorithmus geben, 
+der den Baum nach dem Entfernen eines Knotens wieder zu einem validen \gls{rbt} macht. 
+
+Nun kommt es zu einer Verletzung der Regeln, wenn man einen schwarzen Knoten entfernt, weil dann nicht mehr alle Pfade die selbe Anzahl von Ihnen haben. Der folgende Algorithmus, desses Ablaufplan in Abbildung \ref{del-tr} dargestellt ist wird nach dem Algorithmus ausgeführt,
+der den zu löschenden Knoten mit einem Blatt austauscht, aber vor dem tatsächlichen Entfernen aus dem Baum.
+Auch hier gibt es wieder eine Fallunterscheidung. Diesmal jedoch mit 4 Fällen. Diese sind auch in der Abbildung entsprechend markiert.
+Als erstes wird einmal überprüft, ob die Wurzel entfernt wird (also ob der Knoten überhaupt einen Parent hat) oder ob er rot ist. In diesem Fällen ist der Algorithmus sofort fertig und man kann sicher Löschen.
+
+Anderfalls muss nun das Rebalancieren beginnen. Wenn der Sibling des aktuellen Knotens rot ist, dann wird der Parent rot gefärbt, der Sibling schwarz und es wird in Richtung des aktuellen Knotens um den Parent rotiert.
+Wenn der Sibling rot ist, werden dann Niece und Nephew überprüft.
+Wenn der Nephew rot ist, dann wird der \textbf{2. Fall} behandelt. In diesem Fall wird der Sibling rot eingefärbt, der Parent und Nephew schwarz und es wird in Richtung des aktuellen Knotens um den Parent rotiert.
+Das schöne hier ist, dass nach diesem Fall der Baum balanciert ist und das entfernen des Knotens durchgeführt werden kann.
+Sonst geht es damit weiter, dass die Farbe der Niece überprüft wird. Ist sie rot, dann wird der Algorithmus für den \textbf{3. Fall} ausgeführt. Hier wird die Niece schwarz gefärbt, der Sibling rot und dann um den Sibling in Richtung des aktuellen Knotens rotiert.
+Und wenn alle oben genannten Bediengungen nicht zutreffen, dann sind alle genannten Knoten schwarz und es wird einfach der Sibling rot gefärbt und der Algorithmus beim Parent fortgesetzt. Das ist der 4. Fall.
+Die 4 Abbildungen unten illustrieren die Unterbäume für die 4 Fälle. Der Knoten, der mit $x$ bezeichnet ist, ist der zu entfernende Knoten. Es ist ein Leaf oder Halfleaf per Definition. 
+
+Als kurze Erklärung warum die Algorithmen so definiert sind, muss man erstmal das Problem definieren. Im Unterbaum des zu löschenden Knotens fehlt ein schwarzer Knoten. Nun gibt es 2 Ansätze, dieses Problem zu lösen. Entweder man versucht, 
+einen neuen schwarzen Knoten zu erzeugen, damit die Balance wieder hergestellt wird. Das sind die Fälle 1, 2, 3. Allerdings muss dabei sichergestellt werden, dass die anderen Regeln des \gls{rbt} danach weiterhin gelten. Oder man probiert aus dem benachbarten Unterbaum einen schwarzen Knoten zu entfernen (Fall 4).
+Hier besteht nun das Problem, dass sich die Anzahl der Knoten durch den Parent und dessen Sibling unterscheiden. Also muss man auch einen schwarzen Knoten aus dem Unterbaum des Siblings des Parents entfernen. Und so weiter bis man an der Wurzel ankommt.  
+Auch hier kann man zeigen, dass die Anzahl der Ausführungen der einzelnen Algorithmen für die Fälle begrenzt ist, der gesamte Algorithmus also terminiert.
+
+\begin{figure}[h]
+  \begin{minipage}[t]{.21\linewidth}
+    \centering
+    \begin{tikzpicture} [
+      inner sep = 0,
+      level 1/.style = { sibling distance = 2cm },
+      level 2/.style = { sibling distance = 1cm },
+      every node/.style={thick, draw, circle, minimum width = 0.5cm}
+      ]
+    
+      \node [black] {p}
+      child [-latex] { node[black] {x} } 
+      child [-latex] { node [red] {s} child { node[black] {ni} } child { node[black] {ne} } };
+    \end{tikzpicture}
+    \caption{1. Fall}
+  \end{minipage}
+  \hfill
+  \begin{minipage}[t]{.21\linewidth}
+    \centering
+    \begin{tikzpicture} [
+      inner sep = 0,
+      level 1/.style = { sibling distance = 2cm },
+      level 2/.style = { sibling distance = 1cm },
+      every node/.style={thick, draw, circle, minimum width = 0.5cm}
+      ]
+    
+      \node [black] {p}
+      child [-latex] { node[black] {x} } 
+      child [-latex] { node [black] {s} child { node[red] {ni} } child { node[red] {ne} } };
+    \end{tikzpicture}
+    \caption{2. Fall}
+  \end{minipage}
+  \hfill
+  \begin{minipage}[t]{.21\linewidth}
+    \centering
+    \begin{tikzpicture} [
+      inner sep = 0,
+      level 1/.style = { sibling distance = 2cm },
+      level 2/.style = { sibling distance = 1cm },
+      every node/.style={thick, draw, circle, minimum width = 0.5cm}
+      ]
+    
+      \node [black] {p}
+      child [-latex] { node[black] {x} } 
+      child [-latex] { node [black] {s} child { node[black] {ni} } child { node[red] {ne} } };
+    \end{tikzpicture}
+    \caption{3. Fall}
+  \end{minipage}
+  \hfill
+  \begin{minipage}[t]{.21\linewidth}
+    \centering
+    \begin{tikzpicture} [
+      inner sep = 0,
+      level 1/.style = { sibling distance = 2cm },
+      level 2/.style = { sibling distance = 1cm },
+      every node/.style={thick, draw, circle, minimum width = 0.5cm}
+      ]
+    
+      \node [black] {p}
+      child [-latex] { node[black] {x} } 
+      child [-latex] { node [black] {s} child { node[black] {ni} } child { node[black] {ne} } };
+    \end{tikzpicture}
+    \caption{4. Fall}
+  \end{minipage}
+  \hfill
+
+\end{figure}
+
+\pagebreak
 \section{Implementierung} \label{impl}
 Wie schon in den vorhergenden Kapiteln beschrieben, handelt es sich bei den Bäumen um eine generische Datenstruktur, in die der Nutzer beliebig Daten mit einem bestimmten Schlüssel einfügen kann.
 
@@ -389,12 +722,6 @@ Wie schon in Kapitel \ref{def} beschrieben, sind Bäume nichts anders als ein 3-
 $l$ und $r$ sind die Unterbäume und $k$ ist die Wurzel des Baumes (hier als $k$ bezeichnet wegen Schlüssel $\widehat{=}$ Key).
 Jeder Knoten enthält somit seinen Schlüssel und eine Referenz auf den linken und rechten Unterbaum.
 In \cpl wird der Baum nun als verkettete Liste von Knoten dargestellt
-\footnote{Theoretisch gibt es auch eine Möglichkeit die Baumstruktur als \gls{arr} von Knoten darzustellen und bessere Cacheladezeiten zu bekommen.
-Das größte Problem beim der Implementierung als verkettete Datenstruktur ist, dass die einzelnen Knoten stark verstreut im Heap abgespeichert sind und somit es zu vielen Cache Misses kommt. Diese Streuung kommt durch die Implementierung von \lstin{malloc} in der \cpl-Standart-Bibliothek zu stande ("The order and contiguity of storage allocated by successive calls to malloc() is unspecified." \cite{IEEEmalloc}). Das verlangsamt das Programm.
-Man könnte als Array Implementierung eine spezielle Möglichkeit nutzen, Indizes für das Strukturieren des Arrays in Parent und Child zu nutzen.
-Die Root würde den Index 0 erhalten. Die linken und rechten Kinder dann jeweils den Index $2 \cdot n + 1$ und $2 \cdot n + 2$ ($n$ ist der Index des Parents). So erhält jeder Knoten einen eindeutigen Index und es gibt eine eindeutige Parent-Child-Beziehung.
-Leider ist der Red-Black-Tree kein vollständig balancierter Binary Tree, sodass es im Worst Case (Kapitel \ref{time}) passieren kann, dass sehr viel Speicher verschwendet wird, weil sehr viele Stellen im Array unbesetzt bleiben. Deswegen habe ich mich dagegen entschieden und habe die verkettete Variante der Datenstruktur implementiert.
-}.
 Im \lstin{struct Node} haben wir somit den generischen Schlüssel \lstin{T *key} und zugehörigen Wert \lstin{void *value}.
 Zusätzlich speichern wir Pointer zum linken und rechten Child, welche die Wurzeln der entsprechenden Unterbäume sind. Zusätzlich wird auch noch ein Pointer zum Parent gespiechert,
 da man diesen ziemlich oft in den Algorithmen zum Einfügen und Löschen von Knoten benötogt und man so den Quellcode etwas vereinfachen kann.
@@ -889,6 +1216,25 @@ Und ein \lstin{RB_TREE_DUPLICATE_KEY_ERROR} wird ausgegeben, wenn man \lstin{ins
 
 \section{Implementierungsvarianten}
 
+\subsection{Rekursive Implementierung} 
+Wie schon häufig im Kapitel \ref{impl} erwähnt, kann man auch die Suche und die Traversierung direkt als rekursive Funktionen, die sich selbst aufrufen implementieren. Das wurde auch durchgeführt. Im Kaptiel \ref{ben2} kann man die Unterschiede bezüglich der Laufzeit der Programme sehen.
+Interssierte Leser können sich den Quelltext in der Datei \lstin{rbtree_h.c} ansehen. Auf eine genauere Diskussion der Implementierung wird hier verichtet.
+
+\subsection{Kekule Zahlen}
+Theoretisch gibt es auch eine Möglichkeit die Baumstruktur als \gls{arr} von Knoten darzustellen und bessere Cacheladezeiten zu bekommen.
+Das größte Problem beim der Implementierung als verkettete Datenstruktur ist, dass die einzelnen Knoten stark verstreut im Heap abgespeichert sind und somit es zu vielen Cache Misses kommt. Diese Streuung kommt durch die Implementierung von \lstin{malloc} in der \cpl-Standart-Bibliothek zu stande ("The order and contiguity of storage allocated by successive calls to malloc() is unspecified." \cite{IEEEmalloc}). Das verlangsamt das Programm.
+Man könnte als Array Implementierung eine spezielle Möglichkeit nutzen, Indizes für das Strukturieren des Arrays in Parent und Child zu nutzen.
+Die Wurzel würde den Index 0 erhalten. Die linken und rechten Children dann jeweils den Index $2 \cdot n + 1$ und $2 \cdot n + 2$ ($n$ ist der Index des Parents). So erhält jeder Knoten einen eindeutigen Index und es gibt eine eindeutige Parent-Child-Beziehung.
+Leider ist der Red-Black-Tree kein vollständig balancierter Binary Tree, sodass es im Worst Case (Kapitel \ref{time}) passieren kann, dass sehr viel Speicher verschwendet wird, weil sehr viele Stellen im Array unbesetzt bleiben. Deswegen habe ich mich dagegen entschieden und habe die verkettete Variante der Datenstruktur implementiert.
+
+\subsection{$n$-rote Knoten erlauben}
+Als Generalisierung von \gls{rbt} könnte man sich einen $n$-\gls{rbt} vorstellen, in dem es erlaubt ist, dass maximal $n$ rote Knoten aufeinander folgen. ($n \in \mathbb{N}$). 
+Ich vermute, dass dadurch die Zeit, die das Löschen und Einfügen in den Baum benötigen, verringert würde, weil die Fixup-Algorithmen nicht so oft ausgeführt werden müssten bzw. eher terminieren könnten.\cite[S. 301]{btrees}
+Nachteil ist, dass die Länge eines farblich alternierenden Pfades im $n$-\gls{rbt} $n+1$-mal so lang werden kann, wie die eines auschließlich schwarzen Pfads. (Ohne Beweis).
+Das würde die Performance der Suche der Datenstruktur wieder verschlechtern und da die Suche viel häufiger gebraucht wird als das Einfügen und Löschen ist der $n$-\gls{rbt} mit $n > 0$
+keine gute alternative zum $0$-\gls{rbt}. Ich konnte auch keine Implementierungen von ihm finden.
+Eine Implementierung und richtige Benchmarks müssten durchgeführt werden, um die hier aufgestellten Behauptungen zu belegen, was aber aus Platz und Zeitgründen nicht durchgeführt wurde. 
+
 \pagebreak
 \section{Benchmarks}
 
@@ -935,7 +1281,7 @@ Eine weiter interessante Beobachtung ist, dass die Suche und die das Einfügen b
 Einen so starken Unterschied gibt es beim \gls{bt} nicht. Meine Hypothese dafür ist, dass das Rebalancieren beim Löschen von Knoten sehr viel langsamer ist, als das Rebalancieren beim Einfügen, weil
 der Algorithmus häufig den ganzen Baum bis zur Wurzel durchgeht. 
 
-\subsection{Recursive vs. Iterativ}
+\subsection{Recursive vs. Iterativ} \label{ben2}
 
 \begin{wrapfigure}{r}{200px}
   \centering
@@ -959,8 +1305,6 @@ Bei meiner anderen Implementierung gibt es einen Softwarestack, welcher nur die 
 Das könnte für den Signifikanten Unterschied in der Laufzeit der beiden Varianten führen.
 
 \section{Speicher- und Zeitkomplexität} \label{time}
-
-\section{Verwendung}
 
 \begingroup
 \parindent 0pt
