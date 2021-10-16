@@ -251,6 +251,8 @@ n! :=
 \section{Einleitung}
 
 % Einführungssätze
+Das geordnete Speicher von Daten ist in der heutigen Zeit eine sehr wichtige Aufgabe, vorallem mit betracht auf immer größer werdende Datensätze.
+Ebenso ist es wichtig, schnell diese Daten gezielt und effizient zu durchsuchen. Dafür benötigt man optimierte Datenstrukturen. 
 
 % Motivation der Datenstruktur
 Eine Möglichkeit Daten so geordnet zu speichern sind so genannte Baumdatenstrukturen. Diese Speichern Werte geordnet nach einem bestimmten Schlüssel.
@@ -265,7 +267,7 @@ ihre Algorithmen erweitert um \glspl{rbt} zu erhalten.
 Dazu wurden jeweils beide \glspl{dt} in der Programmiersprache \cpl implementiert. Auf den jeweiligen \gls{sc} wird auch eingegangen um auf bestimmte Schwierigkeiten und Besonderheiten und den Implementierungen einzugehen.
 Zudem werden die Ergenisse von \gls{bm} analysiert, welche zeigen sollen, dass \glspl{rbt} tatsächlich besser Laufzeiteigenschaften haben als
 die Standimplementierung der \glspl{bt}.
-Außerdem wird auf die Speicher- und Zeitkomplexität der beiden \glspl{dt} eingegangen und wie sich vorallem der \gls{rbt} im \gls{wc} verhält.
+Außerdem wird auf die Zeitkomplexität der beiden \glspl{dt} eingegangen und wie sich vorallem der \gls{rbt} im \gls{wc} verhält.
 Der Code, welcher hauptsächlich im Abschnitt \ref{impl} zu sehen sind, sind Auschnitte aus der echten Implementierung, 
 aus denen aufgrund von Platzgründen die gesamte Fehlerbehandlung entfernt wurde. Meistens handelt es sich nur um Ausschnitte. 
 Wenn der Leser den gesamten Quellcode sehen möchte, muss er in die Implementierung in \cpl schauen. 
@@ -1346,6 +1348,20 @@ In der unteren Abbildung sind die Knoten, in der eine dick gedruckte Linie \text
 \cite[S. 228]{aic}
 
 \pagebreak
+\section{Fazit}
+
+In der Arbeit wurden die beiden Datenstrukturen \gls{rbt} und \gls{bt} erst theoretisch definiert 
+und dann eine praktische Implementierung des \gls{rbt} erfolgreich umgesetzt. Es wurde ebenfalls eine \gls{bt} implementiert, 
+auf was aber nicht direkt eingegangen wurde. Seine Implementierung wurde lediglich für das Benchmarking benötigt.
+Es wurden außerdem verschiedene Ansätze aufgezeigt, wie man einen \gls{rbt} direkt umsetzten kann, und klar gemacht warum welcher Ansatz gewählt wurde und welche Vor- und Nachteile das mit sich bringt.
+
+Durch ausführliche Benchmarkings konnte aufgezeigt werden, dass der \gls{rbt} tatsächlich eine Performance in Bezug auf die Laufzeit aufweist.
+Das wurde auch nochmal theoretisch mit der Diskussion der Zeitkomplexität untermauert. 
+
+Dem Leser wurde ein umfangreicher Überblick über das Thema geboten und Möglichkeiten, dieses weiter zu erkunden, 
+indem er die noch offenen Fragen selbst versucht zu beantworten. 
+
+\pagebreak
 \begingroup
 \parindent 0pt
 \parskip 2ex
@@ -1356,9 +1372,6 @@ In der unteren Abbildung sind die Knoten, in der eine dick gedruckte Linie \text
 \pagebreak
 \bibliographystyle{alpha}
 \bibliography{references} % see references.bib for bibliography management
-
-
-
 
 \end{document}
 
@@ -1396,5 +1409,3 @@ In der unteren Abbildung sind die Knoten, in der eine dick gedruckte Linie \text
 
 % TODO: ref löschen
 % TODO: ref time
-% TODO: Fazit
-% TODO: Einleitung
