@@ -14,3 +14,5 @@
 \contentsline {figure}{\numberline {13}{\ignorespaces Vergleich Laufzeit \gls {rbt}/\gls {bt}}}{23}{figure.13}%
 \contentsline {figure}{\numberline {14}{\ignorespaces Vergleich der Höhen}}{24}{figure.14}%
 \contentsline {figure}{\numberline {15}{\ignorespaces Vergleich Rekursive/Iterative Implementierungen}}{24}{figure.15}%
+\contentsline {figure}{\numberline {16}{\ignorespaces Zeit-Komplexität}}{25}{figure.16}%
+\contentsline {figure}{\numberline {17}{\ignorespaces Worst Case \gls {rbt}: Pfad mit alternierender Farbe}}{25}{figure.17}%

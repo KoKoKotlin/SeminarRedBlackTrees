@@ -219,6 +219,8 @@ n! :=
 % ------- acronyms -------
 \newacronym{rbt}{RBT}{Red Black Tree}
 \newacronym{bt}{BT}{Binary Tree}
+\newacronym{nc}{NC}{Normal Case}
+\newacronym{wcf}{WC}{Worst Case}
 
 
 % ------- glossary -------
@@ -1271,9 +1273,9 @@ Den Grund dafür kann man sehen, wenn man die Höhen der beiden Bäume vergleich
 als der \gls{bt}. Das sorgt dafür, dass man beim \gls{rbt} im Durchschnitt nicht so viele Vergleiche benötigt, bis man den Knoten erreicht, den man sucht oder einen \lstin{NULL}-Pointer, bei dem 
 man einen neuen Knoten in den Baum einfügt. Das macht sich in den Benchmarks eindeutig bemerkbar.  
 
-\begin{figure}
+\begin{figure}[h]
   \centering
-  \includegraphics[width=400px]{../benchmark/compare_height.png}
+  \includegraphics[width=200px]{../benchmark/compare_height.png}
   \caption{Vergleich der Höhen}
 \end{figure}
 
@@ -1304,8 +1306,46 @@ Meine Vermutung ist, dass es bei sehr großen Bäumen mit einer sehr großen Bau
 Bei meiner anderen Implementierung gibt es einen Softwarestack, welcher nur die nötigen Daten speichert und sich auch nicht vergrößern muss, weil er schon mit der richtigen Größe erstellt wird.
 Das könnte für den Signifikanten Unterschied in der Laufzeit der beiden Varianten führen.
 
-\section{Speicher- und Zeitkomplexität} \label{time}
+\section{Zeitkomplexität} \label{time}
 
+Der \gls{rbt} hat im \gls{nc} erstmal die selbe Komplexität wie der \gls{bt}. Dort gibt es keine Verbesserung.
+Was man jedoch sehen kann, ist, dass im \gls{wcf} die Komplexität von $O(ld(n))$ erhalten bleibt, während sie beim \gls{bt} zu $O(n)$ wird.
+Das liegt daran, dass die Standardimplementierung der Binary Trees keine Balancierung vornimmt. D.h. wenn man Daten in sortierter Reigenfolge einfügt, 
+erhält man eine Linked List, weil immer nur einer der Unterbäume besetzt wird, je nachdem ob die Daten aufsteigend oder absteigend sortiert sind. Die Eigenschaft, 
+dass man nach jedem Vergleich ca. die Hälfte der Daten nicht mehr abarbeiten muss, geht dadurch verloren. 
+Nun ist es so, dass man Baumstrukturen genau zum effizienten Suchen verwenden möchte. Aus diesem Grund ist es besonders wichtig, dass man die schnelle Suche auch im Worst Case beibehält.
+
+\begin{figure}[h]
+  \centering  
+  \caption{Zeit-Komplexität}
+  \begin{tabular}{|c|c|c|c|} 
+    \hline
+    - & Suche & Einfügen & Löschen \\ 
+    \hline
+    Binary Tree (\gls{nc}) & $O(ld(n))$ & $O(ld(n))$ & $O(ld(n))$ \\ 
+    \hline
+    Binary Tree (\gls{wcf}) & $O(n)$ & $O(n)$ & $O(n)$ \\ 
+    \hline
+    Red Black Tree (\gls{nc}) & $O(ld(n))$ & $O(ld(n))$ & $O(ld(n))$ \\ 
+    \hline
+    Red Black Tree (\gls{wcf}) & $O(ld(n))$ & $O(ld(n))$ & $O(ld(n))$ \\ 
+    \hline
+  \end{tabular}
+\end{figure}
+
+Der \gls{wcf} beim \gls{rbt} wird dann erreicht, wenn es einen alternierenden Pfad gibt, d.h. einen Pfad, in dem sich die Farben den Knoten immer abwechseln.
+Dieser kann die doppelte Länge im Vergleich zu einem Pfad erreich, in dem sich nur schwarze Knoten befinden.
+Dieses Beispiel zeigt auch nochmal schön, dass es sich bei \gls{rbt} nicht um vollständig balancierte Bäume handelt, sondern nur um balancierte Bäume, die den \gls{wcf} zu einer linearen Datenstruktur zu werden, vermeiden.
+In der unteren Abbildung sind die Knoten, in der eine dick gedruckte Linie \textbf{endet} jeweils rot und alle anderen schwarz.  
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[width=400px]{worst_case.png}
+  \caption{Worst Case \gls{rbt}: Pfad mit alternierender Farbe}
+\end{figure}
+\cite[S. 228]{aic}
+
+\pagebreak
 \begingroup
 \parindent 0pt
 \parskip 2ex
@@ -1313,6 +1353,7 @@ Das könnte für den Signifikanten Unterschied in der Laufzeit der beiden Varian
 \theendnotes
 \endgroup
 
+\pagebreak
 \bibliographystyle{alpha}
 \bibliography{references} % see references.bib for bibliography management
 
@@ -1352,3 +1393,8 @@ Das könnte für den Signifikanten Unterschied in der Laufzeit der beiden Varian
 %\begin{minipage}{.4\textwidth}
 %  \blindtext
 %\end{minipage}
+
+% TODO: ref löschen
+% TODO: ref time
+% TODO: Fazit
+% TODO: Einleitung
