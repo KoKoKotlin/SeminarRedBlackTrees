@@ -135,27 +135,6 @@
   plural={Heaps}
 }
 
-\newglossaryentry{sts}
-{
-  name={Struct},
-  description={TODO},
-  plural={Structs}
-}
-
-\newglossaryentry{uns}
-{
-  name={Union},
-  description={TODO},
-  plural={Unions}
-}
-
-\newglossaryentry{mc}
-{
-  name={Macro},
-  description={TODO},
-  plural={Macros}
-}
-
 \newglossaryentry{st}
 {
   name={Stack},
@@ -201,27 +180,24 @@ n! :=
 \newglossaryentry{rcd}
 {
   name={Rekursionstiefe},
-  description={TODO},
+  description={Anzahl der geschachtelten Aufrufe einer rekursiven Funktion},
 }
 
-\newglossaryentry{arr}
-{
-  name={Array},
-  description={TODO},
-  plural={Arrays}
-}
+% sts
+% uns
+% mc
+% arr
+% wch
 
-\newglossaryentry{wch}
-{
-  name={Worst-Case-Höhe},
-  description={TODO},
-}
 % ------- acronyms -------
 \newacronym{rbt}{RBT}{Red Black Tree}
 \newacronym{bt}{BT}{Binary Tree}
 \newacronym{nc}{NC}{Normal Case}
 \newacronym{wcf}{WC}{Worst Case}
-
+\newacronym{sts}{STS}{Stack}
+\newacronym{uns}{UNS}{Union}
+\newacronym{mc}{MC}{Macro}
+\newacronym{arr}{ARR}{Array}
 
 % ------- glossary -------
 
@@ -255,27 +231,26 @@ Das geordnete Speicher von Daten ist in der heutigen Zeit eine sehr wichtige Auf
 Ebenso ist es wichtig, schnell diese Daten gezielt und effizient zu durchsuchen. Dafür benötigt man optimierte Datenstrukturen. 
 
 % Motivation der Datenstruktur
-Eine Möglichkeit Daten so geordnet zu speichern sind so genannte Baumdatenstrukturen. Diese Speichern Werte geordnet nach einem bestimmten Schlüssel.
-Eine sehr einfache Baumimplemntierung ist der \gls{bt} welcher jeweils nur 2 Abzweigungen pro Knoten besitzt (rigorose Baumdefinition in Kapitel \ref{def}).
+Eine Möglichkeit, Daten geordnet nach einem Schlüssel zu speichern, sind so genannte Baumdatenstrukturen.
+Eine sehr einfache Baumimplemntierung ist der \gls{bt} welcher jeweils nur 2 Abzweigungen pro Knoten besitzt.
 Leider hat diese naive Variante der Datenstruktur einige Probleme, welche vorallem beim Einfügen der Daten in geordneter Reigenfolge entstehen.
-Um diese Probleme zu umgehen kann man die Algorithmen zum Einfügen und Entfernen neuer Datensätze so anpassen, dass die Baumstruktur performanter wird.
+Um diese zu umgehen kann man die Algorithmen zum Einfügen und Entfernen neuer Datensätze so anpassen, dass die Baumstruktur performanter wird.
 Ein möglicher besserer Ansatz sind die \glspl{rbt}.
 
 % Inhalt der Arbeit
-Diese Arbeit beschreibt wie sich \gls{rbt} von normalen \glspl{bt} unterscheiden. Es wird ausführlich beschrieben, wie normale \glspl{bt} funktionieren und wie man
+Diese Arbeit beschreibt, wie sich \glspl{rbt} von normalen \glspl{bt} unterscheiden. Es wird ausführlich beschrieben, wie normale \glspl{bt} funktionieren und wie man
 ihre Algorithmen erweitert um \glspl{rbt} zu erhalten.
-Dazu wurden jeweils beide \glspl{dt} in der Programmiersprache \cpl implementiert. Auf den jeweiligen \gls{sc} wird auch eingegangen um auf bestimmte Schwierigkeiten und Besonderheiten und den Implementierungen einzugehen.
+Dazu wurden jeweils beide \glspl{dt} in der Programmiersprache \cpl implementiert. Auf den jeweiligen \gls{sc} wird auch eingegangen, um auf bestimmte Schwierigkeiten und Besonderheiten in den Implementierungen einzugehen.
 Zudem werden die Ergenisse von \gls{bm} analysiert, welche zeigen sollen, dass \glspl{rbt} tatsächlich besser Laufzeiteigenschaften haben als
 die Standimplementierung der \glspl{bt}.
 Außerdem wird auf die Zeitkomplexität der beiden \glspl{dt} eingegangen und wie sich vorallem der \gls{rbt} im \gls{wc} verhält.
-Der Code, welcher hauptsächlich im Abschnitt \ref{impl} zu sehen sind, sind Auschnitte aus der echten Implementierung, 
-aus denen aufgrund von Platzgründen die gesamte Fehlerbehandlung entfernt wurde. Meistens handelt es sich nur um Ausschnitte. 
+Die Codeauschnitte in dieser Arbeit sind aus Platzgründen gekürzt. Meistens wurde die Fehlerbehandlung ganz entfernt.
 Wenn der Leser den gesamten Quellcode sehen möchte, muss er in die Implementierung in \cpl schauen. 
 
 
 \section{Definition Binary Tree \& Red Black Tree} \label{def}
 
-Bäume ganz allgemein sind anders als z.B. Arrays und Listen keine lineare Datenstrukturen, in denen alle Daten hintereinander liegen, sondern haben Verzweigungen, die durch bestimmte Eigenschaften in den Daten zu stande kommen.
+Bäume ganz allgemein sind anders als z.B. \glspl{arr} und Listen keine lineare Datenstrukturen, in denen alle Daten hintereinander liegen, sondern haben Verzweigungen, die durch bestimmte Eigenschaften in den Daten zu stande kommen.
 Eine formal mathematische Definition von Bäumen lautet wie folgt:
 
 \begin{definition}{Baum} \label{def_bin}
@@ -283,15 +258,15 @@ Eine formal mathematische Definition von Bäumen lautet wie folgt:
 Ein Baum $T$ ist eine endliche Menge an Knoten mit folgenden Eigenschaften: 
 
 \begin{itemize}
-  \item Es gibt einen speziellen Knoten $k$, den man Wurzel nennt.
+  \item Es gibt einen speziellen Knoten $k$, den man Root (engl. Wurzel) nennt.
   \item Alle anderen Knoten sind in $n \geq 0$ disjunkte Mengen $T_1, \cdots, T_n$ unterteilt, die selbst auch wieder Bäume sind und die man Unterbäume nennt. 
 \end{itemize}
 \end{definition}
 
-Durch diese Definition kann man direkt das Verhältnis zwischen der Wurzel und den anderen Knoten erkennen. Die Wurzel ist den anderen Knoten übergeordnet. 
+Durch diese Definition kann man direkt das Verhältnis zwischen der Root und den anderen Knoten erkennen. Die Root ist den anderen Knoten übergeordnet. 
 Zudem handelt es sich um eine rekursive Definition, weil wir den Baum mithilfe von sich selbst definiert wird.
 Das soll nochmal verdeutlichen, dass es sich grundlegend um eine rekursive Datenstruktur handelt. Alle Algorithmen, die man auf Bäume anwendet, können rekursiv definiert werden, was in den folgenden 
-Kapiteln verdeutlicht
+Kapiteln aufgezeigt wird.
 \cite[S. 308]{aop}
 
 \pagebreak
@@ -319,18 +294,18 @@ Kapiteln verdeutlicht
 \end{wrapfigure}
 
 Der Binary Tree (engl. Binärbaum) ist eine spezielle Art von Baum, für den nach Definition \ref{def_bin} einfach $n \leq 2$ gelten muss. D.h. für jeden Knoten im Baum gibt es maximal 2 Unterbäume.
-Man kann diesen Baum jetzt als 3-Tupel $(l, k, r)$, wobei $l$ und $r$ den linken bzw. rechten Unterbaum darstellen und k die Wurzel. Ich spreche hier über sortierte Binary Trees bzw. Binary Search Trees, werde diese aber absofort trotzdem einfach als Binary Tree bezeichnen.
-Eine entscheidene Eigenschaft ist, dass alle Knoten, die sich in $l$ befinden kleienr als die Wurzel $k$ sind und alle Knoten in $r$ größer.
+Man kann diesen Baum jetzt als 3-Tupel $(l, k, r)$ definieren, wobei $l$ und $r$ den linken bzw. rechten Unterbaum darstellen und k die Root. Ich spreche hier über sortierte Binary Trees bzw. Binary Search Trees, werde diese aber absofort trotzdem einfach als Binary Tree bezeichnen.
+Eine entscheidene Eigenschaft ist, dass alle Knoten, die sich in $l$ befinden kleienr als die Root $k$ sind und alle Knoten in $r$ größer.
 Das ist auch der Grund, warum man von geordneten Bäumen spricht. \cite[S. 147]{aad}
 
 \subsubsection{Nomenklatur spezieller Knoten}
 
-In Abbildung \ref{bin_ex} ist ein Beispiel eines Binary Trees zu sehen. Nun bekommen bestimmte Knoten in diesen Bäumen spezielle Namen, damit man einfach über sich sprechen kann, ohne immer
-eine konkrete Lagebeschreibung machen zu müssen. In diesem Baum ist der Knoten mit der Nummer 10 die Wurzel.
-Wenn wir die Pfeile von der 10 aus entlang gehen gelangen wir zu den Knoten 1 und 15. Diese werden als Children (engl. Kinder) von 10 bezeichnet. Genauso sind 0 und 5 die Childer von 1 uind 12 und 20 die Children von 15.
+In Abbildung \ref{bin_ex} ist ein Beispiel eines Binary Trees zu sehen. Nun bekommen bestimmte Knoten in diesen Bäumen Namen, damit man einfach über sie sprechen kann, ohne immer
+eine konkrete Lagebeschreibung machen zu müssen. In diesem Baum ist der Knoten mit der Nummer 10 die Root.
+Wenn man die Pfeile von der 10 aus entlang geht, gelangt man zu den Knoten 1 und 15. Diese werden als Children (engl. Kinder) von 10 bezeichnet. Genauso sind 0 und 5 die Childer von 1 uind 12 und 20 die Children von 15.
 Umgekehrt bezeichnet man 10 als Parent (engl. Elternteil) von 1 und 15. 
 Die Knoten 0, 5, 12 und 20 sind die Leaves (engl. Blätter) des Baums. Das sind genau die Knoten, die keine Children haben.
-Grundsätzlich ist es so, dass jeder Knoten im Baum einen Parent hat außer die Wurzel.
+Grundsätzlich ist es so, dass jeder Knoten im Baum einen Parent hat außer die Root.
 Alle Knoten, die den gleichen Parent haben, bezeichnet man als Siblings (engl. Geschwister). In unserem Beispiel sind 0 und 5, 12 und 20 und 1 und 15 Siblings. 
 Der Parent eines Parent ist der Grandparent (engl. Großelternteil). Also ist beispielsweise die 10 der Grandparent von der 0.
 \cite[S.311]{aop}
@@ -341,14 +316,14 @@ Diese Unterscheidung wird später in einem Algorithmus wichtig werden.
 
 \subsubsection{Weiter Definitionen}
 Man bezeichnet einen Knoten als \textbf{Leaf} (engl. Blatt), wenn er keine Children besitzt. \cite[S. 36]{aic}
-Dementsprechend bezeichnet man einen Knoten als \lstin{Halfleaf} (engl. Halbblatt), wenn er nur ein Child hat. 
+Dementsprechend bezeichnet man einen Knoten als \textbf{Halfleaf} (engl. Halbblatt), wenn er nur ein Child hat. 
 
 Als \textbf{Path} (engl. Pfad) in einem Baum bezeichnet man eine Folge von Knoten, die paarweise verschieden sind und 2 Knoten im Baum (oder allgemein in einem Graphen) verbinden. \cite[S. 36]{aic}
 
 \subsubsection{Algorithmen}
 
 Die \textbf{Suche} in \gls{bt} ist direkt durch ihre Eigenschaften zu definieren. 
-Da alle Knoten in linken Unterbaum kleiner sind und alle Knoten rechts größer kann man einfach rekursiv eine Suche wie folgt definieren:
+Da alle Knoten im linken Unterbaum kleiner sind und alle Knoten rechts größer kann man einfach rekursiv eine Suche wie folgt definieren:
 
 \begin{algorithm}
   \caption{Suche im \gls{bt}}
@@ -374,10 +349,10 @@ Da alle Knoten in linken Unterbaum kleiner sind und alle Knoten rechts größer 
 
 \lstin{node} ist ein Pointer auf einen Knoten im Baum, \lstin{key} ist der zu suchende Schlüssel.
 \lstin{node}$\rightarrow$\lstin{right} und \lstin{node}$\rightarrow$\lstin{left} 
-sind jeweils Pointer zum rechten und linken Unterbaum. t
+sind jeweils Pointer zum rechten und linken Unterbaum.
 
-Letzendlich funktioniert der Algorithmus so, dass man bei der Wurzel beginnt. 
-Als erstes überprüft man, ob man bei einem NULL Pointer angekommen ist, was bei mir der Sentinel-Wert für einen leeren Knoten ist. 
+Letzendlich funktioniert der Algorithmus so, dass man bei der Root beginnt. 
+Als erstes überprüft man, ob man bei einem NULL Pointer angekommen ist, welcher in dieser Arbeit als der Sentinel-Wert für einen leeren Knoten verwendet wird. 
 Das zeigt an, dass der Schlüssel im Baum nicht vorhanden ist, und es wird direkt NULL ausgegeben.
 Dann wird abgefragt, ob der aktuelle Knoten \lstin{node} bereits den richtigen Schlüssel hat. Wenn das der Fall ist, dann wird er ausgegeben.
 Ansonsten wird die Suche beim linken bzw. rechten Unterbaum fortgesetzt, je nachdem ob \lstin{key} kleiner oder größer als \lstin{node}$\rightarrow$\lstin{key} ist.
@@ -389,18 +364,18 @@ An dieser Stelle wird dann der neue Knoten eingefügt. Da man keinen Pointer auf
 \cite[S. 205]{aic}
 Da der Algorithmus fast genauso wie die Suche definiert ist, wird hier auf Pseudocode verzichtet. 
 
-Die letzte wichtige Operation das \textbf{Löschen} von Knoten. Diese ist wohl die komplizierteste, weil der naive Ansatz, einfach den Knoten zu entfernen, nicht funktioniert.
+Die letzte wichtige Operation ist das \textbf{Löschen} von Knoten. Diese ist wohl die Komplizierteste, weil der naive Ansatz, einfach den Knoten zu entfernen, nicht funktioniert.
 Die einzigen Knoten, die man Entfernen kann, ohne dass der Baum in 2 Teile zerfällt, sind die Leafs.
-Um den Knoten, der gelöscht werden soll, zu finden, kann man die vorhin definierte Suche verwenden.
 Deswegen muss man diesen Knoten, mit einem Leaf austauschen. Dabei muss aber die Inorder-Traversierungsreihenfolge erhalten bleiben (Def. siehe Kapitel \ref{tr}).
-Diese hat dann den nächstkleineren bzw. -größeren Schlüssel.
+Damit muss man mit dem Leaf tauschen, welches den nächstkleineren bzw. -größeren Schlüssel hat.
+Um den Knoten, der gelöscht werden soll, zu finden, kann man die vorhin definierte Suche verwenden.
 Nach dem Austausch ist der zu löschende Knoten ein Leaf oder Halfleaf und kann sicher entfernt werden. 
-Im Falle eines Halfleafs muss dann noch das Kind des entfernten Knotens als Kind des entsprechenden Parents festgelegt werden.
+Im Falle eines Halfleafs muss dann noch das Child des entfernten Knotens als Child des entsprechenden Parents festgelegt werden.
 
 \begin{algorithm}
   \caption{Löschen im \gls{bt}}
   \begin{algorithmic}[1]
-  \Procedure{Preorder}{root, key}
+  \Procedure{DELETE}{root, key}
     \State $node \gets Search(root, key)$
 
     \If {$node == NULL$}
@@ -413,7 +388,7 @@ Im Falle eines Halfleafs muss dann noch das Kind des entfernten Knotens als Kind
     \If {$IsHalfLeaf(node)$}
       \State $SetChild(GetParent(node), GetChild(node))$
     \EndIf
-    \State $Delete(node)$  
+    \State $DELETE_NODE(node)$  
     \EndProcedure
   \end{algorithmic}
 \end{algorithm}
@@ -497,8 +472,9 @@ Ein Unterbaum wechselt die Parents.
 \end{wrapfigure}
 
 Die Motivation für \glspl{rbt} ist der \gls{wc} von den \glspl{bt}. 
-Wenn man hintereinander einfach geordnet Elemente in diese einfügt, dann wird immer eins der beiden Children besetzt je nach Ordnung der Daten.
-Das führt zu einer Datenstruktur, die eher einer linearen Liste gleicht und deswegen schlechtere Zeitkomplexität besitzt.
+Wenn man hintereinander einfach geordnet Elemente in diese einfügt, dann wird immer nur eins der beiden Children besetzt je nach Ordnung der Daten.
+Das führt zu einer Datenstruktur, die eher einer linearen Liste gleicht und deswegen schlechtere Zeitkomplexität besitzt. Diese Problem wird gelöst, indem man dem Baum nach Einfügen und Entfernen von Knoten balanciert,
+d.h. die Anzahl der Knoten in jedem Path von der Root zu einem Leaf gleichgroß zu halten.
 
 Grundsätzlich hat der Red Black Tree auch alle Eigenschaften eines normalen Binary Trees. Jedoch erhält jeder Knoten eine zusätzlich Eigenschaft, die üblicherweise als Farbe bezeichnet wird.
 Dabei kann ein Knoten rot oder schwarz sein.
@@ -508,9 +484,9 @@ Nun werden zusätzlich Regeln eingeführt, die ein Baum erfüllen muss, damit er
 \begin{definition}{Eigenschaft \gls{rbt}}
   
 \begin{itemize}
-  \item[1.] Die Wurzel ist immer schwarz.
+  \item[1.] Die Root ist immer schwarz.
   \item[2.] Die Children eines roten Knotens sind schwarz.
-  \item[3.] Jeder Path zwischen der Wurzel und einem Leaf hat die selbe Anzahl an schwarzen Knoten. 
+  \item[3.] Jeder Path zwischen der Root und einem Leaf hat die selbe Anzahl an schwarzen Knoten. 
 \end{itemize}
 
 \end{definition}
@@ -547,7 +523,7 @@ Die 2. Regel ist äquivalent zur Aussage, dass nicht 2 rote Knoten aufeinander f
     child [-latex] { node[red] {5} child { node[red] {1} } child { node[red] {3} } } 
     child [-latex] { node {20} child { node[red] {12} } child { node[red] {24} } };
   \end{tikzpicture}
-  \caption{Kein \gls{rbt}; Erfüllt Eigenschaft 2 und 3 nicht}
+  \caption{Kein \gls{rbt}; Erfüllt Eigenschaften 2 und 3 nicht}
   \end{minipage}
   
   \caption{Beispiel \gls{rbt}}
@@ -564,7 +540,7 @@ ob irgendeine der Eigenschaften nicht erfüllt ist und dann Knoten umfärben und
 Die \textbf{Suche} im Baum muss nicht verändert werden, da die Eigenschaften keinen Einfluss auf sie haben. \cite[S. 221]{aic}
 
 \textbf{Colorflip} ist ein zusätzlicher Algorithmus, der dann beim Balancieren gebraucht wird.
-Er ändert einfach die Farben bestimmter Knoten von rot nach schwarz bzw. umgekehrt.
+Er ändert einfach die Farben des Parents, Grandparents und des Uncles vom Knoten auf den er angewandet wird von rot nach schwarz bzw. umgekehrt.
 
 \begin{wrapfigure}{l}{0pt}
   \centering
@@ -573,7 +549,7 @@ Er ändert einfach die Farben bestimmter Knoten von rot nach schwarz bzw. umgeke
 \end{wrapfigure}
 
 Beim \textbf{Einfügen} ist die erste Neuerung, dass die neuen Knoten immer rot sind. 
-Also kann nur Eigenschaft zwei invalidiert werden, nach dem dieser Algorithmus durchgeführt wurde. 
+Also kann nur Eigenschaft 2 invalidiert werden, nach dem dieser Algorithmus durchgeführt wurde. 
 Das passiert genau dann, wenn der Parent des eingefügten Knotens rot war. Man erweitert den Standardalgorithmus nun um eine weitere Funktion, 
 die diesen Fall überprüft und dann nach bestimmten Kriterien Rotationen und Colorflips durchführt, bis der Baum wieder ein valider \gls{rbt} ist.
 
@@ -581,10 +557,10 @@ Der Algorithmus wird iterativ auf den Baum angewandet, solange, bis der Parent d
 Begonnen wird beim neu eingefügten Knoten. Der \textbf{1. Fall} tritt ein, wenn der Uncle des behandleten Knotens rot ist. 
 Dann wird einfach ein Colorflip ausgeführt und man setzt den Algorithmus beim Grandparent fort.
 Im \textbf{2. Fall} ist der Uncle schwarz und der aktuelle Knoten in die selbe Richtung zeigt, wie der Parent. 
-Dann wird eine Rotation ausgeführt in die Richtung, in die der Parent zeigt, als Linksrotation wenn es nach links zeigt und ansonsten eine Rechtsrotation.
+Dann wird eine Rotation ausgeführt in die Richtung, in die der Parent zeigt, also Linksrotation wenn es nach links zeigt und ansonsten eine Rechtsrotation.
 Das schöne hier ist nun, dass dieser zweite Fall direkt zum \textbf{3. Fall} führt.
 Er kann jedoch auch erreicht werden, wenn der Parent und der aktuelle Knoten in unterschiedliche Richtungen zeigen. Dann wird in die Richtung des Parents um den Grandparent rotiert, der Parent schwart und der Grandparent rot gefärbt und der Algorithmus wird beendet.
-So braucht man maximal 2 Rotationen oder $h/2$ Colorflips ($h$ ist die Länge des längsten Pfades von der Wurzel zu einem Leaf oder wird auch Höhe des Baums genannt).
+So braucht man maximal 2 Rotationen oder $h/2$ Colorflips ($h$ ist die Länge des längsten Paths von der Root zu einem Leaf oder wird auch Höhe des Baums genannt).
 
 \begin{wrapfigure}{l}{0pt}
   \centering
@@ -596,10 +572,10 @@ So braucht man maximal 2 Rotationen oder $h/2$ Colorflips ($h$ ist die Länge de
 Der letzten Algorithmus, der angepasst werden muss, ist das \textbf{Löschen} von Knoten im Baum. Es muss wieder einen Algorithmus geben, 
 der den Baum nach dem Entfernen eines Knotens wieder zu einem validen \gls{rbt} macht. 
 
-Nun kommt es zu einer Verletzung der Regeln, wenn man einen schwarzen Knoten entfernt, weil dann nicht mehr alle Pfade die selbe Anzahl von Ihnen haben. Der folgende Algorithmus, desses Ablaufplan in Abbildung \ref{del-tr} dargestellt ist wird nach dem Algorithmus ausgeführt,
-der den zu löschenden Knoten mit einem Blatt austauscht, aber vor dem tatsächlichen Entfernen aus dem Baum.
+Nun kommt es zu einer Verletzung der Regeln, wenn man einen schwarzen Knoten entfernt, weil dann nicht mehr alle Pfade die selbe Anzahl von Ihnen haben. 
+Der folgende Algorithmus, ist wieder als Ablaufplan in Abbildung \ref{del-tr} dargestellt. 
 Auch hier gibt es wieder eine Fallunterscheidung. Diesmal jedoch mit 4 Fällen. Diese sind auch in der Abbildung entsprechend markiert.
-Als erstes wird einmal überprüft, ob die Wurzel entfernt wird (also ob der Knoten überhaupt einen Parent hat) oder ob er rot ist. In diesem Fällen ist der Algorithmus sofort fertig und man kann sicher Löschen.
+Als erstes wird einmal überprüft, ob die Root entfernt wird (also ob der Knoten überhaupt einen Parent hat) oder ob er rot ist. In diesen Fällen ist der Algorithmus sofort fertig und man kann sicher Löschen.
 
 Anderfalls muss nun das Rebalancieren beginnen. Wenn der Sibling des aktuellen Knotens rot ist, dann wird der Parent rot gefärbt, der Sibling schwarz und es wird in Richtung des aktuellen Knotens um den Parent rotiert.
 Wenn der Sibling rot ist, werden dann Niece und Nephew überprüft.
@@ -611,7 +587,7 @@ Die 4 Abbildungen unten illustrieren die Unterbäume für die 4 Fälle. Der Knot
 
 Als kurze Erklärung warum die Algorithmen so definiert sind, muss man erstmal das Problem definieren. Im Unterbaum des zu löschenden Knotens fehlt ein schwarzer Knoten. Nun gibt es 2 Ansätze, dieses Problem zu lösen. Entweder man versucht, 
 einen neuen schwarzen Knoten zu erzeugen, damit die Balance wieder hergestellt wird. Das sind die Fälle 1, 2, 3. Allerdings muss dabei sichergestellt werden, dass die anderen Regeln des \gls{rbt} danach weiterhin gelten. Oder man probiert aus dem benachbarten Unterbaum einen schwarzen Knoten zu entfernen (Fall 4).
-Hier besteht nun das Problem, dass sich die Anzahl der Knoten durch den Parent und dessen Sibling unterscheiden. Also muss man auch einen schwarzen Knoten aus dem Unterbaum des Siblings des Parents entfernen. Und so weiter bis man an der Wurzel ankommt.  
+Hier besteht nun das Problem, dass sich die Anzahl der schwazen Knoten der Pfade, die durch den Parent und dessen Sibling führen, unterscheiden. Also muss man auch einen schwarzen Knoten aus dem Unterbaum des Siblings des Parents entfernen. Und so weiter bis man an der Root ankommt.  
 Auch hier kann man zeigen, dass die Anzahl der Ausführungen der einzelnen Algorithmen für die Fälle begrenzt ist, der gesamte Algorithmus also terminiert.
 
 \begin{figure}[h]
@@ -684,14 +660,14 @@ Auch hier kann man zeigen, dass die Anzahl der Ausführungen der einzelnen Algor
 
 \pagebreak
 \section{Implementierung} \label{impl}
-Wie schon in den vorhergenden Kapiteln beschrieben, handelt es sich bei den Bäumen um eine generische Datenstruktur, in die der Nutzer beliebig Daten mit einem bestimmten Schlüssel einfügen kann.
+Wie schon in den vorhergenden Kapiteln beschrieben, handelt es sich bei den Bäumen um eine Datenstruktur, in die der Nutzer beliebig Daten mit einem bestimmten Schlüssel einfügen kann.
 
 Die Implementierung stellt deswegen 3 Funktionen bereit, mit denen man nach einem bestimmten Schlüssel im Baum suchen kann, man einen neuen Schlüssel zusammen mit einem Datensatz einfügen kann und man einen Schlüssel und den Datensatz wieder aus dem Baum löschen kann.
 
 \subsection{Generics in C}
 Bei der Implementierung in \cpl gab es dabei einige Schwierigkeiten, die man lösen musste. Es beginnt damit, dass \cpl keine objekt-orientierte Programmiersprache ist und keine eingebaute Möglichkeit für \glspl{gns} hat.
-Nun kann man dieses Problem auf verschiedene Weisen lösen. Den Wert, der bei jedem Knoten des Baums gespeichert werden soll, lässt sich ganz simple aus Void-Pointer (\lstin{void*}) implementieren, sodass man die Daten beispielsweise auf dem \gls{hp} ablegen kann
-und mithilfe eines Casts den Pointer der Daten (z.B. \lstin{int*}) zu \lstin{void*} umwandeln kann. Das erlaubt es, beliebige Datentypen und sogar \gls{sts} in den Baum einzufügen.
+Nun kann man dieses Problem auf verschiedene Weisen lösen. Den Wert, der bei jedem Knoten des Baums gespeichert werden soll, lässt sich ganz simple als Void-Pointer (\lstin{void*}) implementieren, sodass man die Daten beispielsweise auf dem \gls{hp} ablegen kann
+und mithilfe eines Casts den Pointer der Daten (z.B. \lstin{int*}) zu \lstin{void*} umwandeln kann. Das erlaubt es, beliebige Datentypen und sogar Structs in den Baum einzufügen.
 Diese Variante ist möglich, da die Nutzerdaten auf die Suche nach einem Knoten keinen Einfluss haben.
 
 Anders ist es bei der Implementierung der Schlüssel. Hier muss sichergestellt sein, dass diese untereinander vergleichbar sind, sodass man die Suche, wie im Kapitel \ref{def} beschrieben, durchführen kann.
@@ -710,8 +686,8 @@ union RBTreeKey {
 
 Zusätzlich müsste man dazu noch angeben, welchen Datentyp man in seinem Code nutzt (z.B. mithilfe einer \gls{mc}). Dieser Ansatz ist allerdings sehr unflexibel, weil man auf die Datentypen, die im \lstin{union RBTreeKey} vom Programmierer festgelegt sind, beschränkt ist.
 
-Ein bessere Ansatz ist es, eine \gls{mc} zu definieren, die den Typen der Schlüssel definiert. Zusätzlich kann man noch eine 2. und 3. \gls{mc} definieren, die die Kleiner-Als- und Ist-Gleich-Operatoren definieren.
-Das ermöglicht es beliebige Datentypen als Schlüssel zu verwenden (sogar \glspl{sts}), solange man die Vergleichsmacros definieren kann.
+Ein bessere Ansatz ist es, eine \gls{mc} zu definieren, die den Typen der Schlüssel enthalten. Zusätzlich kann man noch eine 2. und 3. \gls{mc} erstellen, die die Kleiner-Als- und Ist-Gleich-Operatoren definieren.
+Das ermöglicht es beliebige Datentypen als Schlüssel zu verwenden (sogar Structs), solange man die Vergleichsmacros richtig in der \gls{mc} angeben kann.
 
 \begin{lstlisting}[language=C]
 #define T int
@@ -723,18 +699,18 @@ Genau diese Implementierung wurde auch gewählt. Im Usercode müssen nur der Typ
 
 \subsection{Knoten als Struct}
 Wie schon in Kapitel \ref{def} beschrieben, sind Bäume nichts anders als ein 3-Tupel $(l, k, r)$.
-$l$ und $r$ sind die Unterbäume und $k$ ist die Wurzel des Baumes (hier als $k$ bezeichnet wegen Schlüssel $\widehat{=}$ Key).
+$l$ und $r$ sind die Unterbäume und $k$ ist die Root des Baumes (hier als $k$ bezeichnet wegen Schlüssel $\widehat{=}$ Key).
 Jeder Knoten enthält somit seinen Schlüssel und eine Referenz auf den linken und rechten Unterbaum.
-In \cpl wird der Baum nun als verkettete Liste von Knoten dargestellt
-Im \lstin{struct Node} haben wir somit den generischen Schlüssel \lstin{T *key} und zugehörigen Wert \lstin{void *value}.
-Zusätzlich speichern wir Pointer zum linken und rechten Child, welche die Wurzeln der entsprechenden Unterbäume sind. Zusätzlich wird auch noch ein Pointer zum Parent gespiechert,
-da man diesen ziemlich oft in den Algorithmen zum Einfügen und Löschen von Knoten benötogt und man so den Quellcode etwas vereinfachen kann.
+In \cpl wird der Baum nun als verkettete Liste von Knoten dargestellt.
+Im \lstin{struct Node} wird der generischen Schlüssel \lstin{T *key} und zugehörigen Wert \lstin{void *value} gespeichert.
+Zusätzlich gibt es jeweils einen Pointer zum linken und rechten Child, welche die Roots der entsprechenden Unterbäume sind. Zusätzlich wird auch noch ein Pointer auf den Parent gespeichert,
+da man diesen ziemlich oft in den Algorithmen zum Einfügen und Löschen von Knoten benötigt und man so den Quellcode etwas vereinfachen kann.
 
-Natürlich gibt es im Knoten auch noch ein Feld, welches die Farbe des Knotens speichert. Diese ist später wichtig, weil sie von zum balancieren des Baumes benötigt wird.
-Dieses findet während des Einfügens und Löschens neuer Knoten in den Baum statt. Die Werte für dieses Feld im \gls{sts} werden durch die \glspl{mc} \lstin{RB_TREE_RED} und \lstin{RB_TREE_BLACK} definiert.
+Natürlich gibt es im Knoten auch noch ein Feld, welches die Farbe des speichert. Diese ist später wichtig, weil sie von zum balancieren des Baumes benötigt wird.
+Dieses findet während des Einfügens und Löschens neuer Knoten in den Baum statt. Die Werte, die die Farbe annehmen kann, werden durch die \glspl{mc} \lstin{RB_TREE_RED} und \lstin{RB_TREE_BLACK} definiert.
 
-Zusätzlich existiert ein weiter \gls{sts} für den Baum selbst, welcher allerdings nur als Handle für die Funktionen dient. Er speichert die Wurzel
-und die Anzahl der eingefügten Knoten. Diese wird benötigt, damit man die \gls{wch} des Baums berechnen kann
+Zusätzlich existiert ein weiterer Struct für den Baum selbst, welcher allerdings nur als Handle für die Funktionen dient. Er speichert die Root
+und die Anzahl der eingefügten Knoten. Diese wird benötigt, damit man die Worst-Case-Höhe des Baums berechnen kann
 \footnote{Die Worst-Case-Höhe wird für eine kleine Optimierung benötigt. Im Kapitel \ref{tr} wird beschrieben, wie man die Bäume traversiert.
 Das ist normalerweise eine rekursive Operation, die ich jedoch iterativ implementiert habe. Dafür werden \glspl{st} benötigt, die sich dynamisch vergrößern, falls sie überlaufen würden.
 Ich habe diese Stacks jedoch so implementiert, dass man sie mit einer initialen Größe erstellen kann. Die Worst-Case-Höhe des Baums gibt nun ungefähr die größte \gls{rcd} an, welche bei mir der größten Anzahl an Elementen auf dem Stack entspricht.
@@ -779,7 +755,7 @@ void free_tree(struct RBTree *rbtree);
 
 \subsection{Suche nach Knoten} \label{sea}
 Eine der wichtigsten Operation, auf die auch später das Einfügen und das Löschen von Knoten aufbaut ist die Suche im Baum. Diese ist normalerweise als rekursiver Algorithmus definiert, lässt sich aber auch ziemlich einfach iterativ implementieren.
-Grundsätzlich wurde in der Implementierung auf \gls{rec} verzichtet und immer entweder ein iterativer Ansatz verwendet oder ein selbst implementierter \gls{st}, um \glspl{sof} zu vermeiden.
+Grundsätzlich wurde im Code dieser Arbeit auf \gls{rec} verzichtet und immer entweder ein iterativer Ansatz verwendet oder ein selbst implementierter \gls{st}, um \glspl{sof} zu vermeiden.
 
 Die Funktion, die die Suche implementiert, akzeptiert eine Pointer zum Baum, den zu suchenden Schlüssel und einen Pointer, in der der Pointer des gefundenen Knotens geschrieben werden kann, falls vorhanden.
 
@@ -787,7 +763,7 @@ Die Funktion, die die Suche implementiert, akzeptiert eine Pointer zum Baum, den
 uint8_t search_node(struct RBTree* rbtree, T* key, struct Node** node);
 \end{lstlisting}
 
-Der Algorithmus selbst speichert den aktuellen Knoten in der Variable \lstin{struct Node* current} beginnend bei der Wurzel. Anschließen wird iterativ entweder der linke oder der rechte Unterbaum besucht, abhängig davon, ob der Schlüssel, nachdem gesucht wird, kleiner oder größer als der Schlüssel des aktuellen Knotens ist.
+Der Algorithmus selbst speichert den aktuellen Knoten in der Variable \lstin{struct Node* current} beginnend bei der Root. Anschließen wird iterativ entweder der linke oder der rechte Unterbaum besucht, abhängig davon, ob der Schlüssel, nachdem gesucht wird, kleiner oder größer als der Schlüssel des aktuellen Knotens ist.
 Wenn er kleiner ist wird der linke Unterbaum besucht sonst der Rechte. Dies geschiet, in dem \lstin{current} entweder das linke oder rechte Child des aktuellen Knotens zugewisen wird.
 
 Die \lstin{while}-Schleife bricht ab, wenn der Schlüssel gefunden wurde oder das nächste Child \lstin{NULL} ist. Im letzteren Fall wird ein Fehlercode returned und dem Ausgabe Pointer \lstin{NULL} zugewiesen, weil der Schlüssel nicht im Baum vorhanden ist.
@@ -813,7 +789,7 @@ return RB_TREE_SUCCESS;
 \subsection{Einfügen von Knoten}
 
 \subsubsection{Einfügen des neuen Knotens}
-Eine weiter wichtige Operation ist das Einfügen von Daten in den Baum. Dabei müssen die zwei Eigenschaften der Datenstruktur erhalten bleiben, die sortierte Reihenfolge und dass der Baum ein valider \gls{rbt} ist.
+Eine weiter wichtige Operation ist das Einfügen von Daten in den Baum. Dabei müssen die zwei Eigenschaften der Datenstruktur erhalten bleiben, die sortierte Reihenfolge und, dass der Baum ein valider \gls{rbt} ist.
 Das Listing unten zeigt die Signatur der Funktion, die das Einfügen durchführt. Sie akzeptiert einen Pointer zu einem Baumstruct \lstin{struct RBTree* rbtree}, einen Pointer zum Schlüssel des neuen Knotens \lstin{T* key} und optional Daten, die auch im Knoten gespeichert werden sollen, \lstin{void* value} (dieser Wert kann auch \lstin{NULL} sein).
 
 \begin{lstlisting}[language=C]
@@ -856,11 +832,11 @@ new_node->parent = previous;
 \end{lstlisting}
 
 Es gibt auch noch den Spezialfall, dass ein Knoten in einen noch leeren \gls{rbt} eingefügt werden soll.
-Hier muss dann der Pointer auf die Wurzel im \lstin{struct RBTree} gesetzt werden. Deswegen wird bevor der oben angebene Algorithmus ausgeführt wird, noch überprüft,
+Hier muss dann der Pointer auf die Root im \lstin{struct RBTree} gesetzt werden. Deswegen wird bevor der oben angebene Algorithmus ausgeführt wird, noch überprüft,
 ob der Nutzer den leeren Baum als Eingabe in die Funktion gegeben hat.
-Das Gute ist, dass man in diesem Fall auch gar nicht den Baum durchsuchen muss, sondern sofort weiß, dass der neue Knoten die Wurzel selbst ist.
+Das Gute ist, dass man in diesem Fall auch gar nicht den Baum durchsuchen muss, sondern sofort weiß, dass der neue Knoten die Root selbst ist.
 Es darf allerdings nicht vergessen werden, dass durch \lstin{_create_node} die Farbe des neuen Knotens auf rot gesetzt wurde. Sie muss deswegen noch zu schwarz geändert werden,
-weil die Wurzel des \gls{rbt} immer schwarz sein muss.
+weil die Root des \gls{rbt} immer schwarz sein muss.
 \begin{lstlisting}[language=C]
 if (rbtree->root == NULL) {
   rbtree->root = new_node;
@@ -897,6 +873,8 @@ start_node->parent = child;
 
 Hier zeigt sich der Vorteil der Implementierung als Verkettung von Pointern. Die Rotation kann einfach durch das Austauschen von Child- und Parent-Pointern implementiert werden.
 
+Die Funktion, die den Colorflip implementiert, wird hier nicht genauer, betrachtet, weil sie tatsächlich nur das \lstin{color} Feld im Struct ändert.
+
 Nachdem die Helferfunktionen besprochen wurden, kann nun endlich mit dem rebalancieren begonnen werden, welches diese nutzt.
 Die Funktion, die diesen entsprechenden Algorithmus dafür implementiert heißt \lstin{fix_tree_insert}. Ihre Signatur befindet sich im unteren Listing.
 
@@ -917,8 +895,8 @@ Je nach Farbe des Uncle-Knotens und Richtung des Parents werden Colorflips und R
 Dafür können hier nun die Helferfunktionen, die in den letzten Abschnitten beschrieben wurden genutzt werden.
 Der Vorteil daran ist, dass diese auch gleich noch bestimmte Fehlerfälle abfangen, sodass man sich viel Codeduplzierung ersparen kann.
 
-Als letztes wird noch die Farbe der Wurzel auf \lstin{RB_TREE_BLACK} gesetzt, weil es vorkommen kann,
-dass sie am Ende rot ist. Die Eigenschaften von \gls{rbt} schreiben jedoch vor, dass die Wurzel immer schwarz sein muss.
+Als letztes wird noch die Farbe der Root auf \lstin{RB_TREE_BLACK} gesetzt, weil es vorkommen kann,
+dass sie am Ende rot ist. Die Eigenschaften von \gls{rbt} schreiben jedoch vor, dass die Root immer schwarz sein muss.
 Hier wurde bewusst auf eine \lstin{if}-Abfrage verzichtet, um Instruktionen zu sparen.
 
 \begin{lstlisting}[language=C]
@@ -959,8 +937,8 @@ rbtree->root->color = RB_TREE_BLACK;
 \subsection{Löschen von Knoten}
 
 Die letzte Operation, die die Daten im Baum verändert, ist das Löschen von Knoten.
-Diese ist wohl auch die komplizierteste Operation, weil sehr viele Fälle betrachten
-muss und viele und Grenzfälle abfangen muss.
+Sie ist wohl auch der Komplizierteste Algorithmus, weil sie sehr viele Fälle betrachten
+muss und viele Grenzfälle abfangen muss.
 
 In meiner Implementierung findet das Löschen in 3 Schritten statt. Als erstes wird der Knoten, der gelöscht werden soll,
 mit einem Blatt des Baumes ausgetauscht, falls er noch keiner ist. Danach kann dieser sicher entfernt werden, ohne dass der Baum
@@ -976,7 +954,7 @@ uint8_t delete_node(struct RBTree* rbtree, T* key);
 
 \lstin{T* key} ist hier der Schlüssel des Knotens, der gelöscht werden soll.
 
-Es wird damit begonne, dass der Knoten mit dem entsprechenden Schlüssel \lstin{key} gesucht wird.
+Es wird damit begonnen, dass der Knoten mit dem entsprechenden Schlüssel \lstin{key} gesucht wird.
 Dafür kann die \lstin{search}-Funktion verwendet werden, die im Kapitel \ref{sea} etabliert wurde.
 
 \begin{lstlisting}[language=C]
@@ -999,9 +977,9 @@ aber etwas komplizierter in ihrer Implementierung.
 fix_tree_delete(x, rbtree);
 \end{lstlisting}
 
-Jetzt wird noch überprüft, ob die Wurzel gelöscht werden soll, was bedeutet,
+Jetzt wird noch überprüft, ob die Root gelöscht werden soll, was bedeutet,
 dass sie der einzige Knoten im Baum ist. Hier müssen dann einige Felder im \lstin{rbtree}-Struct
-verändert werden. Es werden dann alle Pointer, die auf den Knoten zeigen zu NULL geändert,
+verändert werden. Es werden dann alle Pointer, die auf den Knoten zeigen, zu NULL geändert,
 was ihn effektiv aus dem Baum entfernt. Danach wird der zu löschende Knoten freigegeben.
 
 \begin{lstlisting}[language=C]
@@ -1028,11 +1006,12 @@ Das Austauschen findet in der Funktion \lstin{swap_to_leaf} statt, deren Signatu
 struct Node* swap_to_leaf(struct Node *node_to_delete);
 \end{lstlisting}
 
-\lstin{node_to_delete} ist dabei der Pointer zum Knoten der gelöscht werden soll von \lstin{delete_node} also somit der Knoten, der ein Blatt werden soll.
+\lstin{node_to_delete} ist der Pointer zum Knoten der mit einem Leaf getauscht werden soll. Das darf aber nicht irgendein Leaf sein, sondern das, welches den nächstkleineren bzw -größeren Schlüssel hat, damit
+nach dem Entfernen von \lstin{node_to_delete} die Inorder-Reihenfolge erhalten bleicht.
 
 In der Funktion selbst muss nun der Knoten mit der oben genannten Eigenschaft gefunden werden. Dies geschiet, in dem man erst im linken Unterbaum von \lstin{node_to_delete} des Child sucht, welches sich am weitesten rechts befindet.
 Und falls es das nicht gibt sucht man im rechten Unterbaum nach dem Knoten, der sich am weitesten links befindet. Das sind die Knoten, die in der Inoreder-Reihenfolge direkt vor bzw. nach dem zu löschenden Knoten kommen.
-Das wird durch die Helfer-Funktionen \lstin{get_next_smallest} bzw. \lstin{get_next_largest}. Im unteren Listing kann man beispielhaft die Implementierung einer dieser Funktionen sehen:
+Das wird durch die Helfer-Funktionen \lstin{get_next_smallest} bzw. \lstin{get_next_largest} implementiert. Im unteren Listing kann man beispielhaft die Implementierung einer dieser Funktionen sehen:
 
 \begin{lstlisting}[language=C]
 void get_next_largest(struct Node *start, struct Node **next_largest)
@@ -1059,19 +1038,19 @@ swap(&node_to_delete->value, &next_smallest->value);
 
 \subsubsection{Balancieren des Baumes (Löschen)}
 Ähnlich wie beim Einfügen in den Baum muss auch nach dem Entfernen aus dem Baum rebalanciert werden.
-Die Signatur, die den entsprechenden Algorithmus implementiert ist so definiert:
+Die Signatur der Funktion, die den entsprechenden Algorithmus implementiert ist so definiert:
 \begin{lstlisting}
 void fix_tree_delete(struct Node *x, struct RBTree *rbtree);
 \end{lstlisting}
 
 \lstin{x} ist hier der Pointer auf den Knoten, der aus dem Baum gelöscht werden soll. Wir können hier annehmen, dass er ein Leaf ist,
-denn die \lstin{swap_to_leaf}-Funktion wird vorher auf den Knoten der gelöscht werden soll angewandt, sodass immer nur Blätter gelöscht werden müssen.
+denn die \lstin{swap_to_leaf}-Funktion wird vorher auf den Knoten der gelöscht werden soll angewandt, sodass immer nur Leaves oder Halfleaves gelöscht werden müssen.
 
 Ähnlich wie beim Einfügen gibt es auch hier wieder Fälle, die der Code abarbeiten muss, abhängig von der Farbe bestimmter Knoten.
 Der Algorithmus befindet sich in einer \lstin{while}-Schleife, weil es auch hier wieder passieren kann, dass es mehrere Durchläufe gibt, bevor der Baum balanciert ist.
 
 Die ersten beiden Bediengungen \lstin{x->parent == NULL} und \lstin{get_color(x) == RB_TREE_RED} terminieren den Algorithmus sofort.
-Die erste Bediengung trifft genau dann zu, wenn die Wurzel entfernt wird. Danach entsteht allerdings der leere Baum, der nach Definition balanciert ist, also muss man hier nichts mehr tun.
+Die erste Bediengung trifft genau dann zu, wenn die Root entfernt wird. Danach entsteht allerdings der leere Baum, der nach Definition balanciert ist, also muss man hier nichts mehr tun.
 Da die Eigenschaften von \gls{rbt} beim Löschen nur dann verletzt werden, wenn man einen schwarzen Knoten entfernt,
 kann man auch sofort abbrechen, wenn die Farbe von x rot ist, was der zweiten Bediengung entspricht.
 
@@ -1079,7 +1058,7 @@ Alle anderen Zweige des \lstin{if}-Konstrukts entsprechen nun den 4 Fällen.
 Wie diese sich genau aufbauen, und warum sie so definiert sind, wurde bereits in Kapitel \ref{def} beschrieben, deswegen wird dieser Teil hier nicht nochmal im Detail erklärt.
 
 Was es noch anzumerken gibt, ist, dass der Fall 2 ebenfalls zum Terminieren des Algorithmus führt, weswegen sich dort ein break am Ende des Codeblocks befindet.
-Es ist durch die Definition des Algorithmus sichergestellt, dass dieser immer terminiert, also irgendwann die Wurzel erreicht oder den Fall 2 (siehe Kapitel \ref{def}).
+Es ist durch die Definition des Algorithmus sichergestellt, dass dieser immer terminiert, also irgendwann die Root erreicht oder den Fall 2 (siehe Kapitel \ref{def}).
 
 Das untere Listing zeigt die gesamte Implementierung der Funktion.
 
@@ -1146,7 +1125,7 @@ Alle diese Algorithmen sind rekursiv definiert. \cite[S. 44ff]{aic}  Der untere 
 \end{algorithm}
 \cite[S. 318ff]{aop}
 
-Dabei ist \lstin{noteptr} der Pointer der Wurzel des Unterbaums (der ganze Baum ist auch ein Unterbaum von sich selbst). Und \lstin{VISIT} stellt dabei eine Funktionspointer dar, der einen \lstin{noteptr} als Parameter akzeptiert und ebenfalls als Argument in die Traversierungsfunktionen gegeben wird.
+Dabei ist \lstin{noteptr} der Pointer der Root des Unterbaums (der ganze Baum ist auch ein Unterbaum von sich selbst). Und \lstin{VISIT} stellt dabei eine Funktionspointer dar, der einen \lstin{noteptr} als Parameter akzeptiert und ebenfalls als Argument in die Traversierungsfunktionen gegeben wird.
 So ist es dem Nutzer möglich, eine bestimmte Funktion auf alle Knoten anzuwenden.
 
 \begin{lstlisting}[language=C]
@@ -1173,12 +1152,12 @@ uint8_t inorder_traversel(struct RBTree *rbtree, void (*visit)(struct Node*))
 
 Im oberen Listing kann man am Beispiel der Inorder-Traversierung erkennen, wie die Algorithmen iterativ implementiert wurden. Anstatt den Hardware-\gls{st} zu verwenden, wurde ein Software-\gls{st} \lstin{struct Stack *stack} implementiert.
 In diesen werden jeweils die noch zu besuchenden Unterbäume gepushed, und wenn der aktuelle Knoten \lstin{current} \lstin{NULL} ist, wird ein neuer Knoten aus dem \gls{st} geholt.
-Diese Vorgehen simuliert das verhalten einer rekusiven Funktion, jedoch besteht bei sehr großer \gls{rcd} nicht die Möglichkeit eines \gls{sof}. Die anderen Traversierungsarten wurden auf die selbe Weise implementiert.
+Diese Vorgehen simuliert das Verhalten einer rekusiven Funktion, jedoch besteht bei sehr großer \gls{rcd} nicht die Möglichkeit eines \gls{sof}. Die anderen Traversierungsarten wurden auf die selbe Weise implementiert.
 
 Es kommt auf die genutzte Traversierungsart an, in welcher Reihenfolge man die Knoten besucht. Wenn man Inorder nutzt, dann bekommt man sie nach Schlüsseln aufsteigend sortiert. Das kann man z.B. dafür nutzen, die Schlüssel in geordneter Reihenfolge auszugeben.
-Bei der Postorder Traversierung wird die Wurzel des Unterbaums als besucht. So kann man Bottom-Up-Algorithmen implementieren, die bei den Blättern beginnen und die Wurzel des Baums als letztes behandeln.
+Bei der Postorder Traversierung wird die Root des Unterbaums als letztes besucht. So kann man Bottom-Up-Algorithmen implementieren, die bei den Leaves beginnen und die Root des Baums als letztes behandeln.
 
-Ein sehr praktischen Bespiel dafür ist das Freigeben der \glspl{rbt}. Dabei müssen zuerst die Unterbäume aus dem \gls{hp} gelöscht werden und danach die Wurzel, weil man sonst die Unterbäume zwischenspeichern müsste, da die Pointer zu ihnen in der Wurzel gespeichert sind.
+Ein sehr praktischen Bespiel dafür ist das Freigeben der \glspl{rbt}. Dabei müssen zuerst die Unterbäume aus dem \gls{hp} gelöscht werden und danach die Root, weil man sonst die Unterbäume zwischenspeichern müsste, da die Pointer zu ihnen in der Root gespeichert sind.
 Wenn man diese aber nun als erster freigibt, würde man keinen Zugriff mehr auf ihre Unterbäume haben.
 
 \begin{lstlisting}[language=C]
@@ -1196,11 +1175,11 @@ void free_tree(struct RBTree *rbtree)
 }
 \end{lstlisting}
 
-Hier wurde die \lstin{VISIT}-Funktion als \lstin{_free_node} implementiert, welche den Schlüssel und den Wert des besuchten Knotens freigibt und dann den Knoten-\gls{sts} selbst.
+Hier wurde die \lstin{VISIT}-Funktion als \lstin{_free_node} implementiert, welche den Schlüssel und den Wert des besuchten Knotens freigibt und dann den Knoten-Structs selbst.
 
 \subsection{Fehlerbehandlung} \label{err}
 Wie man in vielen vorhergenden Listings bereits sehen konnte, haben die meisten Funktionen als Ausgabetypen \lstin{uint8_t}. (Die Fehlerbehandlung wurde aus den Listings jedoch meistens weggelassen, damit die sie nicht zu lang werden.)
-Das liegt, dass die Funktionen über den Ausgabewert Fehler an den Nutzer zurückgeben. Diese Fehler wurden als \gls{mc} definiert und durch sie können verschiedene Arten unterschieden werden.
+Das liegt daran, dass die Funktionen über den Ausgabewert Fehler an den Nutzer zurückgeben. Diese Fehler wurden als \gls{mc} definiert und durch sie können verschiedene Fehlerarten unterschieden werden.
 
 \begin{lstlisting}[language=C]
 #define RB_TREE_SUCCESS             0U
@@ -1213,7 +1192,7 @@ Das liegt, dass die Funktionen über den Ausgabewert Fehler an den Nutzer zurüc
 In meiner Implementierung repräsentiert die 0 immer, dass es keinen Fehler gab.
 \lstin{RB_TREE_OUT_OF_MEM} wird von Funktionen verwendet, die dynamisch Speicher allozieren und das Betriebssystem nicht mehr genug zur Verfügung stellt.
 Die einzige Funktion, die den Fehler nutzt, ist \lstin{insert_node}, nämlich genau dann, wenn kein neuer Knoten erstellt werden kann.
-Hierbei wird der Fehler allerdings nicht ausgegeben, sondern das Program wird mit \lstin{exit(RB_TREE_OUT_OF_MEM)} beendet.
+Hierbei wird der Fehler allerdings nicht ausgegeben, sondern das Programm wird mit \lstin{exit(RB_TREE_OUT_OF_MEM)} beendet.
 Ein \lstin{RB_TREE_KEY_ERROR} wird von \lstin{search_node} ausgegeben, wenn der zu suchende Schlüssel im Baum nicht existiert.
 Funktionen, die Pointer als Argumente akzeptieren, geben einen \lstin{RB_TREE_NULL_ERROR} Fehler aus, wenn mindestens einer dieser Pointer \lstin{NULL} ist.
 Und ein \lstin{RB_TREE_DUPLICATE_KEY_ERROR} wird ausgegeben, wenn man \lstin{insert_node} einen Schlüssel übergibt, der bereits im Baum existiert und man doppelte Schlüssel und implizites Überschreiben mithilfe der \lstin{RB_TREE_DUPLICATE_KEYS} \gls{mc} deaktiviert hat.
@@ -1227,9 +1206,10 @@ Interssierte Leser können sich den Quelltext in der Datei \lstin{rbtree_h.c} an
 \subsection{Kekule Zahlen}
 Theoretisch gibt es auch eine Möglichkeit die Baumstruktur als \gls{arr} von Knoten darzustellen und bessere Cacheladezeiten zu bekommen.
 Das größte Problem beim der Implementierung als verkettete Datenstruktur ist, dass die einzelnen Knoten stark verstreut im Heap abgespeichert sind und somit es zu vielen Cache Misses kommt. Diese Streuung kommt durch die Implementierung von \lstin{malloc} in der \cpl-Standart-Bibliothek zu stande ("The order and contiguity of storage allocated by successive calls to malloc() is unspecified." \cite{IEEEmalloc}). Das verlangsamt das Programm.
-Man könnte als Array Implementierung eine spezielle Möglichkeit nutzen, Indizes für das Strukturieren des Arrays in Parent und Child zu nutzen.
-Die Wurzel würde den Index 0 erhalten. Die linken und rechten Children dann jeweils den Index $2 \cdot n + 1$ und $2 \cdot n + 2$ ($n$ ist der Index des Parents). So erhält jeder Knoten einen eindeutigen Index und es gibt eine eindeutige Parent-Child-Beziehung.
-Leider ist der Red-Black-Tree kein vollständig balancierter Binary Tree, sodass es im Worst Case (Kapitel \ref{time}) passieren kann, dass sehr viel Speicher verschwendet wird, weil sehr viele Stellen im Array unbesetzt bleiben. Deswegen habe ich mich dagegen entschieden und habe die verkettete Variante der Datenstruktur implementiert.
+
+Kekule-Zahlen sind eine spezielle Variante, das Array zu indizieren, um zwischen den Elementen eine konkrete Parent-Child-Beziehung herzustellen. 
+Die Root würde den Index 0 erhalten. Die linken und rechten Children dann jeweils den Index $2 \cdot n + 1$ und $2 \cdot n + 2$ ($n$ ist der Index des Parents). So erhält jeder Knoten einen eindeutigen Index.
+Leider ist der Red-Black-Tree kein vollständig balancierter Binary Tree, sodass es im Worst Case (Kapitel \ref{time}) passieren kann, dass sehr viel Speicher verschwendet wird, weil sehr viele Stellen im \gls{arr} unbesetzt bleiben. Deswegen habe ich mich dagegen entschieden und habe die verkettete Variante der Datenstruktur implementiert.
 
 \subsection{$n$-rote Knoten erlauben}
 Als Generalisierung von \gls{rbt} könnte man sich einen $n$-\gls{rbt} vorstellen, in dem es erlaubt ist, dass maximal $n$ rote Knoten aufeinander folgen. ($n \in \mathbb{N}$). 
@@ -1249,13 +1229,13 @@ Es soll verglichen werden, ob die \gls{rbt} tatsächlich schneller sind als die 
 
 \subsection{Durchführung}
 Für die Benchmarks wurde im \cpl-Code eine \lstin{main}-Funktion erstellt, die die Anzahl an Knoten, mit denen getestest werden soll als Kommandozeilenparameter erwartet.
-Anschließend werden zufällig zwei Arrays erstellt, die mit zufällig generierten Daten befüllt werden. Das erste enthält Daten, die in die Bäume eingefügt werden sollen und das zweite Daten, nach denen gesucht wird.
+Anschließend werden zufällig zwei \glspl{arr} erstellt, die mit zufällig generierten Daten befüllt werden. Das erste enthält Daten, die in die Bäume eingefügt werden sollen und das zweite Daten, nach denen gesucht wird.
 
-Begonnen wird mit dem \gls{rbt}. Er wird zuerst mit den Daten befüllt, danach wird nach den Schlüsseln im zweiten Array gesucht. Dann wird seine Höhe bestimmt (welche ein sehr wichtiges Kriterium für die Laufzeit ist) und am Ende werden die Knoten alle wieder entfernt.  
+Begonnen wird mit dem \gls{rbt}. Er wird zuerst mit den Daten befüllt, danach wird nach den Schlüsseln im zweiten \gls{arr} gesucht. Dann wird seine Höhe bestimmt (welche ein sehr wichtiges Kriterium für die Laufzeit ist) und am Ende werden die Knoten alle wieder entfernt.  
 Die Zeit, die die Operationen brauchen, wird direkt im Code gemessen und dann in den \lstin{stdout} ausgegeben im CSV Format. Die selbe Prozedur wird anschließend auch noch für den \gls{bt} durchgeführt.
 Das testen mit verschiedenen Knotenanzahlen wurde durch ein Pythonscript automatisiert, welche das Programm kompieliert und dann mit verschiedenen Knotenanzahlen ausführt. 
 Begonnen wird dabei bei 100.000 Knoten und das wird in Schritten von 50.000 bis auf 2.000.000 erhöht. Damit zufällige Schwankungen ausgeschlossen werden, wird jeder Test mit einer bestimmten Anzahl 
-15 mal durchgeführt und am Ende wird der Durchschnitt der Messwerte gebildet. 
+15 mal durchgeführt und am Ende wird das arithmetische Mittel der Messwerte gebildet. 
 
 \subsection{Red-Black-Tree vs. Binary Tree} \label{bbrbt}
 
@@ -1283,9 +1263,9 @@ man einen neuen Knoten in den Baum einfügt. Das macht sich in den Benchmarks ei
 
 Eine weiter interessante Beobachtung ist, dass die Suche und die das Einfügen beim \gls{rbt} ungefähr gleich schnell sind, während das Löschen etwas langsamer als diese beiden Operationen ist.
 Einen so starken Unterschied gibt es beim \gls{bt} nicht. Meine Hypothese dafür ist, dass das Rebalancieren beim Löschen von Knoten sehr viel langsamer ist, als das Rebalancieren beim Einfügen, weil
-der Algorithmus häufig den ganzen Baum bis zur Wurzel durchgeht. 
+der Algorithmus häufig den ganzen Baum bis zur Root durchgeht. 
 
-\subsection{Recursive vs. Iterativ} \label{ben2}
+\subsection{Rekursiv vs. Iterativ} \label{ben2}
 
 \begin{wrapfigure}{r}{200px}
   \centering
@@ -1336,9 +1316,9 @@ Nun ist es so, dass man Baumstrukturen genau zum effizienten Suchen verwenden m�
 \end{figure}
 
 Der \gls{wcf} beim \gls{rbt} wird dann erreicht, wenn es einen alternierenden Pfad gibt, d.h. einen Pfad, in dem sich die Farben den Knoten immer abwechseln.
-Dieser kann die doppelte Länge im Vergleich zu einem Pfad erreich, in dem sich nur schwarze Knoten befinden.
+Dieser kann die doppelte Länge im Vergleich zu einem Pfad erreicht, in dem sich nur schwarze Knoten befinden.
 Dieses Beispiel zeigt auch nochmal schön, dass es sich bei \gls{rbt} nicht um vollständig balancierte Bäume handelt, sondern nur um balancierte Bäume, die den \gls{wcf} zu einer linearen Datenstruktur zu werden, vermeiden.
-In der unteren Abbildung sind die Knoten, in der eine dick gedruckte Linie \textbf{endet} jeweils rot und alle anderen schwarz.  
+In der unteren Abbildung sind die Knoten, in denen eine dick gedruckte Linie \textbf{endet} jeweils rot und alle anderen schwarz.  
 
 \begin{figure}[h]
   \centering
@@ -1355,7 +1335,7 @@ und dann eine praktische Implementierung des \gls{rbt} erfolgreich umgesetzt. Es
 auf was aber nicht direkt eingegangen wurde. Seine Implementierung wurde lediglich für das Benchmarking benötigt.
 Es wurden außerdem verschiedene Ansätze aufgezeigt, wie man einen \gls{rbt} direkt umsetzten kann, und klar gemacht warum welcher Ansatz gewählt wurde und welche Vor- und Nachteile das mit sich bringt.
 
-Durch ausführliche Benchmarkings konnte aufgezeigt werden, dass der \gls{rbt} tatsächlich eine Performance in Bezug auf die Laufzeit aufweist.
+Durch ausführliche Benchmarkings konnte aufgezeigt werden, dass der \gls{rbt} tatsächlich eine bessere Performance in Bezug auf die Laufzeit aufweist.
 Das wurde auch nochmal theoretisch mit der Diskussion der Zeitkomplexität untermauert. 
 
 Dem Leser wurde ein umfangreicher Überblick über das Thema geboten und Möglichkeiten, dieses weiter zu erkunden, 
@@ -1375,37 +1355,9 @@ indem er die noch offenen Fragen selbst versucht zu beantworten.
 
 \end{document}
 
-% for citation:
-% \cite{aad} for simple citation
-% \cite[S. 20]{aad} for citation with page number(s)
-
-% for acronyms and glossary ref:
-% https://en.wikibooks.org/wiki/LaTeX/Glossary
-% \gls{acro-name}
-
-% Listings Example:
-% \begin{lstlisting}[language=C]
-%         #include <stdio.h>
-%
-%         int main(void)
-%         {
-%                 printf("Hello, World\n");
-%                 return EXIT_SUCCESS;
-%         }
-% \end{lstlisting}
-
 % TODO:
 % Definitions
 % Reference for Stackoverflow recursion depth in defs and traversal
-% Pictures for tree and for tree array represantation
-
-
-%\begin{minipage}{.5\textwidth}
-%  \input{bild.tex}  
-%\end{minipage}
-%\begin{minipage}{.4\textwidth}
-%  \blindtext
-%\end{minipage}
-
-% TODO: ref löschen
-% TODO: ref time
+% ref löschen
+% ref time
+% ref kekule
