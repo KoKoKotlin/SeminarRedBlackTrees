@@ -97,7 +97,7 @@
 \newglossaryentry{bm}
 {
   name=Benchmark,
-  description={Test für die Zeitkomplexität und Speicherkomplextät von Software},
+  description={Test für die Dauer und Speichernutzung während der Laufzeit von Programmen},
 }
 
 \newglossaryentry{dt}
@@ -117,35 +117,14 @@
 \newglossaryentry{wc}
 {
   name={Worst Case},
-  description={Konfiguration der Daten in einer Datenstruktur, bei der sie am schlechtesten arbeitet (z.B. besonders viel Zeit zur Datenverarbeitung benötigt oder besonders viel Speicher benötigt)},
+  description={Obere Grenze für die Zeit- bzw. Speicherkomplexität eines Algorithmus bzw einer Datenstruktur. \cite[S. 27]{ita}},
   plural={Worst Cases}
-}
-
-\newglossaryentry{gns}
-{
-  name={Generic},
-  description={TODO},
-  plural={Generics}
-}
-
-\newglossaryentry{hp}
-{
-  name={Heap},
-  description={TODO},
-  plural={Heaps}
-}
-
-\newglossaryentry{st}
-{
-  name={Stack},
-  description={TODO},
-  plural={Stacks}
 }
 
 \newglossaryentry{sof}
 {
   name={Stackoverflow},
-  description={TODO},
+  description={Fehlerfall, bei dem ein Stack über seine Maximalgröße hinaus vergrößert wird.},
   plural={Stackoverflows}
 }
 
@@ -166,14 +145,14 @@ n! :=
 \newglossaryentry{tv}
 {
   name={Traversierung},
-  description={TODO},
+  description={Durchlaufen der Knoten einer Baumstruktur in einer bestimmten Reihenfolge. Jeder Knoten wird genau einmal besucht \cite[S. 319]{aop}},
   plural={Traversierungen}
 }
 
 \newglossaryentry{psc}
 {
   name={Pseudocode},
-  description={TODO},
+  description={Programmcode, der Unabhängig von einer konkreten Programmiersprache ist \cite[S. 26]{aad}},
   plural={Pseudocodes}
 }
 
@@ -183,21 +162,18 @@ n! :=
   description={Anzahl der geschachtelten Aufrufe einer rekursiven Funktion},
 }
 
-% sts
-% uns
-% mc
-% arr
-% wch
-
 % ------- acronyms -------
 \newacronym{rbt}{RBT}{Red Black Tree}
 \newacronym{bt}{BT}{Binary Tree}
 \newacronym{nc}{NC}{Normal Case}
 \newacronym{wcf}{WC}{Worst Case}
-\newacronym{sts}{STS}{Stack}
+\newacronym{st}{ST}{Stack}
 \newacronym{uns}{UNS}{Union}
 \newacronym{mc}{MC}{Macro}
 \newacronym{arr}{ARR}{Array}
+\newacronym{gns}{GNR}{Generic}
+\newacronym{hp}{HP}{Heap}
+
 
 % ------- glossary -------
 
@@ -657,6 +633,7 @@ Auch hier kann man zeigen, dass die Anzahl der Ausführungen der einzelnen Algor
   \hfill
 
 \end{figure}
+\cite{YTDelete}
 
 \pagebreak
 \section{Implementierung} \label{impl}
@@ -743,7 +720,7 @@ struct RBTree {
 };
 \end{lstlisting}
 
-Zusätzlich existieren 2 Helfer-Funktionen, die jeweils eine Instanz von diesem \gls{sts} für den Nutzer erstellen und auch wieder freigeben. Der Baum wird durch die \lstin{create_tree} Funktion auf dem Heap abgespeichert und es wird lediglich ein Pointer zu ihm ausgegeben.
+Zusätzlich existieren 2 Helfer-Funktionen, die jeweils eine Instanz von diesem Struct für den Nutzer erstellen und auch wieder freigeben. Der Baum wird durch die \lstin{create_tree} Funktion auf dem Heap abgespeichert und es wird lediglich ein Pointer zu ihm ausgegeben.
 Das Löschen des Baumes wird durch \lstin{free_tree} implementiert. Dieses ist auf keinen Fall trivial, weil es Bottom-Up durchgeführt werden muss und somit nicht durch den Nutzer selbst implementiert werden sollte.
 
 Die Signatur dieser Funktionen sieht man im unteren Listing.
@@ -1314,6 +1291,7 @@ Nun ist es so, dass man Baumstrukturen genau zum effizienten Suchen verwenden m�
     \hline
   \end{tabular}
 \end{figure}
+\cite[S.215, S. 227f]{aic}
 
 Der \gls{wcf} beim \gls{rbt} wird dann erreicht, wenn es einen alternierenden Path gibt, d.h., einen Path, in dem sich die Farben der Knoten immer abwechseln.
 Dieser kann die doppelte Länge im Vergleich zu einem Path erreichen, in dem sich nur schwarze Knoten befinden.
@@ -1350,14 +1328,20 @@ indem er die noch offenen Fragen selbst versucht, zu beantworten.
 \endgroup
 
 \pagebreak
+\vspace*{\fill}
+\begin{center}
+  \textbf{Selbstständigkeitserklärung}  
+\end{center}
+Hiermit versichere ich, dass ich die vorliegende Seminararbeit selbständig 
+und ohne unerlaubte Hilfe angefertigt und andere als die in der Seminararbeit 
+angegebenen Hilfsmittel nicht benutzt habe. Alle Stellen, die wörtlich
+oder sinngemäß aus anderen Schriften entnommen sind, habe ich als solche
+kenntlich gemacht.
+
+\vspace*{\fill}
+
+\pagebreak
 \bibliographystyle{alpha}
 \bibliography{references} % see references.bib for bibliography management
 
 \end{document}
-
-% TODO:
-% Definitions
-% Reference for Stackoverflow recursion depth in defs and traversal
-% ref löschen
-% ref time
-% ref kekule
