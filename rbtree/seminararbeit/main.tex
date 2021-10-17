@@ -209,7 +209,7 @@ Ebenso ist es wichtig, schnell diese Daten gezielt und effizient zu durchsuchen.
 % Motivation der Datenstruktur
 Eine Möglichkeit, Daten geordnet nach einem Schlüssel zu speichern, sind so genannte Baumdatenstrukturen.
 Eine sehr einfache Baumimplementierung ist der \gls{bt}, welcher jeweils nur 2 Abzweigungen pro Knoten besitzt.
-Leider hat diese naive Variante der Datenstruktur einige Probleme, welche vor allem beim Einfügen der Daten in geordneter Reigenfolge entstehen.
+Leider hat diese naive Variante der Datenstruktur einige Probleme, welche vor allem beim Einfügen der Daten in geordneter Reihenfolge entstehen.
 Um diese zu umgehen, kann man die Algorithmen zum Einfügen und Entfernen neuer Datensätze so anpassen, dass die Baumstruktur performanter wird.
 Ein möglicher besserer Ansatz sind die \glspl{rbt}.
 
@@ -217,8 +217,8 @@ Ein möglicher besserer Ansatz sind die \glspl{rbt}.
 Diese Arbeit beschreibt, wie sich \glspl{rbt} von normalen \glspl{bt} unterscheiden. Es wird ausführlich beschrieben, wie normale \glspl{bt} funktionieren und wie man
 ihre Algorithmen erweitert, um \glspl{rbt} zu erhalten.
 Dazu wurden jeweils beide \glspl{dt} in der Programmiersprache \cpl implementiert. Auf den jeweiligen \gls{sc} wird auch eingegangen, um auf bestimmte Schwierigkeiten und Besonderheiten in den Implementierungen einzugehen.
-Zudem werden die Ergenisse von \gls{bm} analysiert, welche zeigen sollen, dass \glspl{rbt} tatsächlich bessere Laufzeiteigenschaften haben als
-die Standimplementierung der \glspl{bt}.
+Zudem werden die Ergebnisse von \gls{bm} analysiert, welche zeigen sollen, dass \glspl{rbt} tatsächlich bessere Laufzeiteigenschaften haben als
+die Standardimplementierung der \glspl{bt}.
 Außerdem wird auf die Zeitkomplexität der beiden \glspl{dt} eingegangen und wie sich vor allem der \gls{rbt} im \gls{wc} verhält.
 Die Codeauschnitte in dieser Arbeit sind aus Platzgründen gekürzt. Meistens wurde die Fehlerbehandlung ganz entfernt.
 Wenn der Leser den gesamten Quellcode sehen möchte, muss er in die Implementierung in \cpl schauen. 
@@ -290,7 +290,7 @@ Da die folgenden Benennungen nun ein bisschen komplizierter werden, kommen nun d
 Und die Children vom Uncle werden als Niece (engl. Nichte) (grün, die 12) und Nephew (engl. Neffe) (magenta, die 20) bezeichnet. Die Niece ist immer der Knoten, der in dieselbe Richtung zeigt, wie der Knoten auf den man sich bezieht. Der Nephew ist der Knoten, der in die entgegengesetzte Richtung zeigt.
 Diese Unterscheidung wird später in einem Algorithmus wichtig werden.
 
-\subsubsection{Weiter Definitionen}
+\subsubsection{Weitere Definitionen}
 Man bezeichnet einen Knoten als \textbf{Leaf} (engl. Blatt), wenn er keine Children besitzt. \cite[S. 36]{aic}
 Dementsprechend bezeichnet man einen Knoten als \textbf{Halfleaf} (engl. Halbblatt), wenn er nur ein Child hat. 
 
@@ -637,7 +637,7 @@ Auch hier kann man zeigen, dass die Anzahl der Ausführungen der einzelnen Algor
 
 \pagebreak
 \section{Implementierung} \label{impl}
-Wie schon in den vorhergenden Kapiteln beschrieben, handelt es sich bei den Bäumen um eine Datenstruktur, in die der Nutzer beliebig Daten mit einem bestimmten Schlüssel einfügen kann.
+Wie schon in den vorhergehenden Kapiteln beschrieben, handelt es sich bei den Bäumen um eine Datenstruktur, in die der Nutzer beliebig Daten mit einem bestimmten Schlüssel einfügen kann.
 
 Die Implementierung stellt deswegen 3 Funktionen bereit, mit denen man nach einem bestimmten Schlüssel im Baum suchen kann, man einen neuen Schlüssel zusammen mit einem Datensatz einfügen kann und einen Schlüssel und den Datensatz wieder aus dem Baum löschen kann.
 
@@ -663,7 +663,7 @@ union RBTreeKey {
 
 Zusätzlich müsste man dazu noch angeben, welchen Datentyp man in seinem Code nutzt (z.B. mithilfe einer \gls{mc}). Dieser Ansatz ist allerdings sehr unflexibel, weil man auf die Datentypen, die im \lstin{union RBTreeKey} vom Programmierer festgelegt sind, beschränkt ist.
 
-Ein bessere Ansatz ist es, eine \gls{mc} zu definieren, die den Typen der Schlüssel enthält. Zusätzlich kann man noch eine 2. und 3. \gls{mc} erstellen, die die Kleiner-Als- und Ist-Gleich-Operatoren definieren.
+Ein besserer Ansatz ist es, eine \gls{mc} zu definieren, die den Typen der Schlüssel enthält. Zusätzlich kann man noch eine 2. und 3. \gls{mc} erstellen, die die Kleiner-Als- und Ist-Gleich-Operatoren definieren.
 Das ermöglicht es, beliebige Datentypen als Schlüssel zu verwenden (sogar Structs), solange man die Vergleichsmacros richtig in der \gls{mc} angeben kann.
 
 \begin{lstlisting}[language=C]
@@ -672,7 +672,7 @@ Das ermöglicht es, beliebige Datentypen als Schlüssel zu verwenden (sogar Stru
 #define TLESS(x, y) ((x) < (y))
 \end{lstlisting}
 
-Genau diese Implementierung wurde auch gewählt. Im Usercode müssen nur der Typ \lstin{T} und die Vergleichsoperationen \lstin{TLESS} und \lstin{TEQUAL} definiert werden. Einziger Nachteil ist, dass man im selbe \gls{sc} nicht meherere verschiedene Varianten von Schlüsseldatentypen nutzen kann.
+Genau diese Implementierung wurde auch gewählt. Im Usercode müssen nur der Typ \lstin{T} und die Vergleichsoperationen \lstin{TLESS} und \lstin{TEQUAL} definiert werden. Einziger Nachteil ist, dass man im selben \gls{sc} nicht meherere verschiedene Varianten von Schlüsseldatentypen nutzen kann.
 
 \subsection{Knoten als Struct}
 Wie schon in Kapitel \ref{def} beschrieben, sind Bäume nichts anderes als ein 3-Tupel $(l, k, r)$.
@@ -809,7 +809,7 @@ new_node->parent = previous;
 \end{lstlisting}
 
 Es gibt auch noch den Spezialfall, dass ein Knoten in einen noch leeren \gls{rbt} eingefügt werden soll.
-Hier muss dann der Pointer auf die Root im \lstin{struct RBTree} gesetzt werden. Deswegen wird, bevor der oben angebene Algorithmus ausgeführt wird noch überprüft,
+Hier muss dann der Pointer auf die Root im \lstin{struct RBTree} gesetzt werden. Deswegen wird, bevor der oben angegebene Algorithmus ausgeführt wird noch überprüft,
 ob der Nutzer den leeren Baum als Eingabe in die Funktion gegeben hat.
 Das Gute ist, dass man in diesem Fall auch gar nicht den Baum durchsuchen muss, sondern sofort weiß, dass der neue Knoten die Root selbst ist.
 Es darf allerdings nicht vergessen werden, dass durch \lstin{_create_node} die Farbe des neuen Knotens auf rot gesetzt wurde. Sie muss deswegen noch zu schwarz geändert werden,
@@ -821,7 +821,7 @@ if (rbtree->root == NULL) {
 }
 \end{lstlisting}
 
-\subsubsection{Balancieren des Baums (Einfügen)}
+\subsubsection{Balancieren des Baumes (Einfügen)}
 Nach dem Einfügen in den Baum kann es dazu kommen, dass die Regeln des \glspl{rbt} verletzt werden.
 Dieser Fall tritt dann ein, wenn der Parent des neuen Knotens rot ist, denn dann sind 2 aufeinanderfolgende rote Knoten im Baum, was nicht sein darf (siehe \ref{def}).
 
@@ -1155,7 +1155,7 @@ void free_tree(struct RBTree *rbtree)
 Hier wurde die \lstin{VISIT}-Funktion als \lstin{_free_node} implementiert, welche den Schlüssel und den Wert des besuchten Knotens freigibt und dann den Knotenstruct selbst.
 
 \subsection{Fehlerbehandlung} \label{err}
-Wie man in vielen vorhergenden Listings bereits sehen konnte, haben die meisten Funktionen als Ausgabetypen \lstin{uint8_t}. (Die Fehlerbehandlung wurde aus den Listings jedoch meistens weggelassen, damit sie nicht zu lang werden.)
+Wie man in vielen vorhergehenden Listings bereits sehen konnte, haben die meisten Funktionen als Ausgabetypen \lstin{uint8_t}. (Die Fehlerbehandlung wurde aus den Listings jedoch meistens weggelassen, damit sie nicht zu lang werden.)
 Das liegt daran, dass die Funktionen über den Ausgabewert Fehler an den Nutzer zurückgeben. Diese Fehler wurden als \gls{mc} definiert und durch sie können verschiedene Fehlerarten unterschieden werden.
 
 \begin{lstlisting}[language=C]
@@ -1254,7 +1254,7 @@ der Algorithmus häufig den ganzen Baum bis zur Root durchgeht.
 Eine wichtige Frage, die sich während der Implementierung gestellt hat ist, ob man die Operationen vom \gls{rbt} iterativ oder rekursiv implementiert. 
 \gls{rec} wäre zwar die erste Sache, an die man dabei denkt, weil die Definition von Bäumen auch meistens rekursiv ist. Außerdem werden auch alle Algorithmen rekursiv beschrieben. 
 Das Problem daran ist, dass durch sehr große Rekursionstiefe eventuell Leistungsprobleme entstehen können und teilweise auch sehr viel Speicher nötig ist. 
-Deswegen wurde, wie schon in vorhergenden Kapiteln beschrieben, eine iterative und eine rekursive Version der \gls{dt} erstellt, um diese zu vergleichen.
+Deswegen wurde, wie schon in vorhergehenden Kapiteln beschrieben, eine iterative und eine rekursive Version der \gls{dt} erstellt, um diese zu vergleichen.
 Das Benchmark wurde wie im vorhergehenden Abschnitt \ref{bbrbt} durchgeführt, nur wurden hier die 2 verschiedenen Versionen des Programms getestet.
 Dafür wurde das Pythonscript verändert, sodass es zuerst die iterative Variante kompiliert und die Tests ausführt und in eine Datei schreibt und anschließend das selbe für die Rekursive durchführt. 
 
@@ -1269,7 +1269,7 @@ Das könnte für den signifikanten Unterschied in der Laufzeit der beiden Varian
 
 Der \gls{rbt} hat im \gls{nc} die selbe Komplexität wie der \gls{bt}. Dort gibt es keine Verbesserung.
 Was man jedoch sehen kann ist, dass im \gls{wcf} die Komplexität von $O(ld(n))$ erhalten bleibt, während sie beim \gls{bt} zu $O(n)$ wird.
-Das liegt daran, dass die Standardimplementierung der Binary Trees keine Balancierung vornimmt. D.h., wenn man Daten in sortierter Reigenfolge einfügt, 
+Das liegt daran, dass die Standardimplementierung der Binary Trees keine Balancierung vornimmt. D.h., wenn man Daten in sortierter Reihenfolge einfügt, 
 erhält man eine Linked List, weil immer nur einer der Unterbäume besetzt wird, je nachdem ob die Daten aufsteigend oder absteigend sortiert sind. Die Eigenschaft, 
 dass man nach jedem Vergleich ca. die Hälfte der Daten nicht mehr abarbeiten muss, geht dadurch verloren. 
 Nun ist es so, dass man Baumstrukturen genau zum effizienten Suchen verwenden möchte. Aus diesem Grund ist es besonders wichtig, dass man die schnelle Suche auch im Worst Case beibehält.
