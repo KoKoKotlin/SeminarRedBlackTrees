@@ -1185,7 +1185,7 @@ Theoretisch gibt es auch eine Möglichkeit die Baumstruktur als \gls{arr} von Kn
 Das größte Problem bei der Implementierung als verkettete Datenstruktur ist, dass die einzelnen Knoten stark verstreut im Heap abgespeichert sind und somit es zu vielen Cache Misses kommt. Diese Streuung kommt durch die Implementierung von \lstin{malloc} in der \cpl-Standart-Bibliothek zustande ("The order and contiguity of storage allocated by successive calls to malloc() is unspecified." \cite{IEEEmalloc}). Das verlangsamt das Programm.
 
 Kekule-Zahlen sind eine spezielle Variante, das Array zu indizieren, um zwischen den Elementen eine konkrete Parent-Child-Beziehung herzustellen. 
-Die Root würde den Index 0 erhalten. Die linken und rechten Children dann jeweils den Index $2 \cdot n + 1$ und $2 \cdot n + 2$ ($n$ ist der Index des Parents). So erhält jeder Knoten einen eindeutigen Index.
+Die Root würde den Index 0 erhalten. Die linken und rechten Children dann jeweils den Index $2 \cdot n + 1$ und $2 \cdot n + 2$ ($n$ ist der Index des Parents). \cite{kek} So erhält jeder Knoten einen eindeutigen Index.
 Leider ist der Red-Black-Tree kein vollständig balancierter Binary Tree, sodass es im Worst Case (Kapitel \ref{time}) passieren kann, dass sehr viel Speicher verschwendet wird, weil sehr viele Stellen im \gls{arr} unbesetzt bleiben. Deswegen habe ich mich dagegen entschieden und habe die verkettete Variante der Datenstruktur implementiert.
 
 \subsection{$n$-rote Knoten erlauben}
