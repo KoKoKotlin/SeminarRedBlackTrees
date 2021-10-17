@@ -1,18 +1,18 @@
 \babel@toc {ngerman}{}
-\contentsline {figure}{\numberline {1}{\ignorespaces Beispielhafte Abbildung eines Binärbaums}}{5}{figure.1}%
-\contentsline {figure}{\numberline {2}{\ignorespaces Baumrotationen Beispiel}}{7}{figure.2}%
-\contentsline {figure}{\numberline {3}{\ignorespaces Worst Case \gls {bt}}}{7}{figure.3}%
-\contentsline {figure}{\numberline {4}{\ignorespaces Valider \gls {rbt}}}{8}{figure.4}%
-\contentsline {figure}{\numberline {5}{\ignorespaces Kein \gls {rbt}; Erfüllt Eigenschaften 2 und 3 nicht}}{8}{figure.5}%
-\contentsline {figure}{\numberline {6}{\ignorespaces Beispiel \gls {rbt}}}{8}{figure.6}%
-\contentsline {figure}{\numberline {7}{\ignorespaces Programmablaufplan Einfügen}}{8}{figure.7}%
-\contentsline {figure}{\numberline {8}{\ignorespaces Programmablaufplan Löschen}}{9}{figure.8}%
-\contentsline {figure}{\numberline {9}{\ignorespaces 1. Fall}}{10}{figure.9}%
-\contentsline {figure}{\numberline {10}{\ignorespaces 2. Fall}}{10}{figure.10}%
-\contentsline {figure}{\numberline {11}{\ignorespaces 3. Fall}}{10}{figure.11}%
-\contentsline {figure}{\numberline {12}{\ignorespaces 4. Fall}}{10}{figure.12}%
-\contentsline {figure}{\numberline {13}{\ignorespaces Vergleich Laufzeit \gls {rbt}/\gls {bt}}}{23}{figure.13}%
-\contentsline {figure}{\numberline {14}{\ignorespaces Vergleich der Höhen}}{24}{figure.14}%
-\contentsline {figure}{\numberline {15}{\ignorespaces Vergleich Rekursive/Iterative Implementierungen}}{24}{figure.15}%
-\contentsline {figure}{\numberline {16}{\ignorespaces Zeit-Komplexität}}{25}{figure.16}%
-\contentsline {figure}{\numberline {17}{\ignorespaces Worst Case \gls {rbt}: Path mit alternierender Farbe}}{25}{figure.17}%
+\contentsline {figure}{\numberline {1}{\ignorespaces Beispielhafte Abbildung eines Binärbaums}}{6}{figure.1}%
+\contentsline {figure}{\numberline {2}{\ignorespaces Baumrotationen Beispiel}}{8}{figure.2}%
+\contentsline {figure}{\numberline {3}{\ignorespaces Worst Case \gls {bt}}}{8}{figure.3}%
+\contentsline {figure}{\numberline {4}{\ignorespaces Valider \gls {rbt}}}{9}{figure.4}%
+\contentsline {figure}{\numberline {5}{\ignorespaces Kein \gls {rbt}; Erfüllt Eigenschaften 2 und 3 nicht}}{9}{figure.5}%
+\contentsline {figure}{\numberline {6}{\ignorespaces Beispiel \gls {rbt}}}{9}{figure.6}%
+\contentsline {figure}{\numberline {7}{\ignorespaces Programmablaufplan Einfügen}}{9}{figure.7}%
+\contentsline {figure}{\numberline {8}{\ignorespaces Programmablaufplan Löschen}}{10}{figure.8}%
+\contentsline {figure}{\numberline {9}{\ignorespaces 1. Fall}}{11}{figure.9}%
+\contentsline {figure}{\numberline {10}{\ignorespaces 2. Fall}}{11}{figure.10}%
+\contentsline {figure}{\numberline {11}{\ignorespaces 3. Fall}}{11}{figure.11}%
+\contentsline {figure}{\numberline {12}{\ignorespaces 4. Fall}}{11}{figure.12}%
+\contentsline {figure}{\numberline {13}{\ignorespaces Vergleich Laufzeit \gls {rbt}/\gls {bt}}}{24}{figure.13}%
+\contentsline {figure}{\numberline {14}{\ignorespaces Vergleich der Höhen}}{25}{figure.14}%
+\contentsline {figure}{\numberline {15}{\ignorespaces Vergleich Rekursive/Iterative Implementierungen}}{25}{figure.15}%
+\contentsline {figure}{\numberline {16}{\ignorespaces Zeit-Komplexität}}{26}{figure.16}%
+\contentsline {figure}{\numberline {17}{\ignorespaces Worst Case \gls {rbt}: Path mit alternierender Farbe}}{26}{figure.17}%
