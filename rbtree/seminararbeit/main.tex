@@ -388,7 +388,7 @@ Im Falle eines Halfleafs muss dann noch das Child des entfernten Knotens als Chi
     \If {$IsHalfLeaf(node)$}
       \State $SetChild(GetParent(node), GetChild(node))$
     \EndIf
-    \State $DELETE_NODE(node)$  
+    \State $FREE(node)$  
     \EndProcedure
   \end{algorithmic}
 \end{algorithm}
